@@ -14,6 +14,8 @@ Rails.application.routes.draw do
   get "/transports/import", to: "transports#import_transports"
   resources :transports
 
+  resources :products
+
   get "/items/export", to: "items#export"
   resources :items do
     member do
