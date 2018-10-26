@@ -108,10 +108,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_113247) do
     t.decimal "price"
     t.string "serial_number"
     t.datetime "updated_at", precision: nil, null: false
+    t.integer "product_id"
     t.index ["case_id"], name: "index_items_on_case_id"
     t.index ["inventory_number"], name: "index_items_on_inventory_number", unique: true
     t.index ["item_id"], name: "index_items_on_item_id"
     t.index ["item_type_id"], name: "index_items_on_item_type_id"
+    t.index ["product_id"], name: "index_items_on_product_id"
+  end
+
+  create_table "product_vendor_links", force: :cascade do |t|
+    t.integer "product_id"
+    t.integer "vendor_id"
+    t.string "order_link"
+    t.string "order_number"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_product_vendor_links_on_product_id"
+    t.index ["vendor_id"], name: "index_product_vendor_links_on_vendor_id"
+  end
+
+  create_table "products", force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.string "product_number"
+    t.string "product_link"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "transports", force: :cascade do |t|
@@ -136,4 +158,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_113247) do
     t.string "tracking_number"
     t.datetime "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
   end
+<<<<<<< HEAD
+=======
+
+  create_table "vendors", force: :cascade do |t|
+    t.string "name"
+    t.string "account_name"
+    t.string "customer_id"
+    t.boolean "on_account"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+>>>>>>> 282a926 (product: updated db.schema and added more seed data)
 end

@@ -11,6 +11,7 @@ class Item < ApplicationRecord
   belongs_to :item_type, optional: true
   belongs_to :location, optional: true, inverse_of: :location_items,
                         class_name: "Item", foreign_key: "location_item_id"
+  belongs_to :product, optional: true
 
   validates :name, presence: true
   validates :inventory_number, uniqueness: true, allow_nil: true
