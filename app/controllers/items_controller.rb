@@ -11,13 +11,18 @@ class ItemsController < ApplicationController
                   download: params["commit"] == "Download"
     end
 
+    @query = params[:q].to_s.strip
+
     respond_to do |format|
       format.html do
-        @items = Item.where(deleted: false)
+        @items = Item.where(deleted: false).search(@query).includes(:case, :location)
+
+        # Single hit -> jump directly to the item
+        redirect_to item_path(@items.first) if @query.present? && @items.size == 1
       end
 
       format.json do
-        @items = Item.where(deleted: false)
+        @items = Item.where(deleted: false).search(@query)
 
         render json: @items
       end

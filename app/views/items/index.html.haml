@@ -2,6 +2,12 @@
 
 %h2 Items
 
+- if @query.present?
+  %p
+    #{pluralize(@items.size, 'result')} for
+    %strong= @query
+    = link_to 'clear', items_path
+
 %a{href: items_export_path} create csv export
 %a{href: item_types_path} create item type
 %br
@@ -24,9 +30,9 @@
       %th Location
       %th Action
   %tbody
-    - @items.sort_by{ |i| i.name }.each do |item|
+    - @items.sort_by{ |i| i.name.to_s.downcase }.each do |item|
       %tr
-        %td= item.case.name
+        %td= item.case&.name
         - if item.missing
           %td.missing{title: "missing"}
             %a{href: item_path(item)}= item.name

@@ -27,6 +27,9 @@
           = active_link_to('cases', cases_path)
         %li
           = active_link_to('items', items_path)
+        %li.search
+          = form_with url: items_path, method: :get, local: true do
+            = search_field_tag :q, params[:q], placeholder: 'search items…'
 
       - if controller.controller_name == 'cases'
         %ul.submenu
