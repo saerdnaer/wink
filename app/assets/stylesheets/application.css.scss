@@ -802,3 +802,38 @@ table.running_sets {
 
   progress { width: 8em; margin-right: 0.5em; vertical-align: middle; }
 }
+
+// check list sections: fold triangle and "later" button
+h3.section_heading {
+  .fold_toggle {
+    display: inline-block;
+    width: 1.1em;
+    margin-right: 0.2em;
+    color: #555;
+    cursor: pointer;
+  }
+
+  .section_later {
+    margin-left: 0.8em;
+    padding: 1px 8px;
+    border: none;
+    border-radius: 0;
+    background: #000;
+    color: #fff;
+    font: inherit;
+    font-size: 0.6em;
+    vertical-align: middle;
+    cursor: pointer;
+
+    &:hover, &:focus {
+      background: #28c3ab;
+      color: #000;
+    }
+  }
+}
+
+.noborder.folded {
+  .checklist_group { display: none; }
+  h3.section_heading { opacity: 0.7; }
+}
+

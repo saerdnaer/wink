@@ -20,4 +20,5 @@
 //= require image_drop
 //= require remember_username
 //= require check_list_offline
+//= require check_list_sections
 

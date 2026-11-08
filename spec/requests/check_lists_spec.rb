@@ -235,4 +235,20 @@ RSpec.describe "Check lists" do
       expect(response.body).not_to include("search items")
     end
   end
+
+  describe "edit page: sections" do
+    let(:event) { Event.create!(name: "ev", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
+    let!(:check_list) { CheckList.create!(advisor: "andi") }
+
+    before do
+      EventCase.create!(event: event, case: case_record, check_list: check_list)
+      CheckListItem.create!(check_list: check_list, item: item)
+    end
+
+    it "has a later button and a fold triangle for every section" do
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body).to include("section_later", "fold_toggle", "Long press: fold / unfold.")
+    end
+  end
 end

@@ -3,15 +3,19 @@
     .noborder
       - if location.empty?
         %a{name: Digest::MD5.hexdigest("nolocation")}
-        %h3.section_heading{id: Digest::MD5.hexdigest("nolocation"), title: "Double-click: check / uncheck the whole section"}
+        %h3.section_heading{id: Digest::MD5.hexdigest("nolocation"), title: "Double-click: check / uncheck the whole section. Long press: fold / unfold."}
+          %span.fold_toggle{role: "button", tabindex: 0, "aria-expanded": "true", title: "Fold / unfold"} ▼
           no location
           %span.progress{data: { total: items.count }}= "(#{items.count(&:checked)}/#{items.count})"
+          %button.section_later{type: "button", title: "Move this section to the end"} later
       - else
         %p.export_cases
           %a{name: "#{Digest::MD5.hexdigest(location)}"}
-          %h3.section_heading{id: Digest::MD5.hexdigest(location), title: "Double-click: check / uncheck the whole section"}
+          %h3.section_heading{id: Digest::MD5.hexdigest(location), title: "Double-click: check / uncheck the whole section. Long press: fold / unfold."}
+            %span.fold_toggle{role: "button", tabindex: 0, "aria-expanded": "true", title: "Fold / unfold"} ▼
             = location
             %span.progress{data: { total: items.count }}= "(#{items.count(&:checked)}/#{items.count})"
+            %button.section_later{type: "button", title: "Move this section to the end"} later
 
       %div.checklist_group
         -# TODO: Be able to mark broken items with comments.
