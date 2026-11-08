@@ -26,4 +26,12 @@ RSpec.describe "Item pages" do
       expect(json["@type"]).to eq "ItemList"
     end
   end
+
+  describe "framing" do
+    it "does not send X-Frame-Options" do
+      get "/items/#{item.id}"
+
+      expect(response.headers).not_to have_key("X-Frame-Options")
+    end
+  end
 end

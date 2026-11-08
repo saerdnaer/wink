@@ -29,6 +29,10 @@ module Wink
     # config.eager_load_paths << Rails.root.join("extras")
 
     # set the application name and slogan
+    # Allow embedding WINK pages in frames of other sites: drop Rails' default
+    # "X-Frame-Options: SAMEORIGIN" header.
+    config.action_dispatch.default_headers.delete("X-Frame-Options")
+
     config.application_name = "WINK"
     config.application_slogan = "(W)o (i)st mei(n)e Winke(k)atze?"
 
