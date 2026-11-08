@@ -920,3 +920,8 @@ table.count_results {
 
 .serial_toggle { margin: 0.3em 0 0.8em; }
 
+// "hide checked items": ticked items, complete stacks and complete sections
+.hide_done .checklist_item.done,
+.hide_done .checklist_stack.done,
+.hide_done .noborder.done { display: none !important; }
+

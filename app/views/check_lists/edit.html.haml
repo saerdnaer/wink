@@ -43,6 +43,9 @@
   %label.inline_choice{for: 'show_serials'}
     = check_box_tag 'show_serials', '1', false
     show serial numbers
+  %label.inline_choice{for: 'hide_done'}
+    = check_box_tag 'hide_done', '1', false
+    hide checked items
 
 = render partial: 'record_errors', locals: { record: @check_list }
 

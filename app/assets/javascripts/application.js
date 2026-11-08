@@ -24,4 +24,5 @@
 //= require check_list_counts
 //= require check_list_advisor
 //= require check_list_serials
+//= require check_list_hide_done
 

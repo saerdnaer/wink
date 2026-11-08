@@ -271,6 +271,12 @@ RSpec.describe "Check lists" do
       expect(response.body).to include("Checked by", "Bert and Ernie", "before the event")
     end
 
+    it "has a switch to hide the checked items" do
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body).to include("hide checked items", 'id="hide_done"')
+    end
+
     it "has a switch for the serial numbers, which are hidden by default" do
       get "/check_lists/#{check_list.id}/edit"
 
