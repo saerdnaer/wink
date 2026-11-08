@@ -95,15 +95,24 @@ aside.check_lists {
 input[type=text], textarea {
    width: 250px;
 }
+// Submit buttons look exactly like the black link buttons next to them
+// (same font, size and line height, also on mobile browsers).
 input[type=submit] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   cursor: pointer;
-  font-family: none;
-  font-size: 1em;
+  font: inherit;
+  line-height: inherit;
   border: none;
-  padding: 0;
+  border-radius: 0;
+  margin: 0;
+}
+
+// do not let mobile browsers inflate text differently for buttons and links
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 label { display: block; }
