@@ -49,6 +49,24 @@ RSpec.describe "Check lists" do
       expect(response.body).to include("Not checked yet (1)")
     end
 
+    it "has a link to finish the check list, which closes it" do
+      get "/check_lists/#{check_list.id}"
+      expect(response.body).to include("/check_lists/#{check_list.id}/finish")
+
+      post "/check_lists/#{check_list.id}/finish"
+
+      expect(response).to redirect_to("/check_lists/#{check_list.id}")
+      expect(check_list.reload.checked).to be true
+    end
+
+    it "has no finish link once the check list is finished" do
+      check_list.update!(checked: true)
+
+      get "/check_lists/#{check_list.id}"
+
+      expect(response.body).not_to include("/finish")
+    end
+
     it "lists unchecked items as missing once the check list is finished" do
       check_list.update!(checked: true)
 

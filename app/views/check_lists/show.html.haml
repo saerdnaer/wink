@@ -35,6 +35,7 @@
       %label Actions
       %span.actions
         %a{href: edit_check_list_path(@check_list)} Check me!
+        = link_to "Finish", finish_check_list_path(@check_list), method: :post, class: "finish_check_list", data: { confirm: "Finish this checklist? Items not checked so far are marked as missing." }
 
 - count_results = @check_list.count_results
 - if count_results.any?

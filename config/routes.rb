@@ -17,6 +17,7 @@ Rails.application.routes.draw do
   resources :check_lists do
     member do
       post :add_advisor
+      post :finish
     end
   end
 

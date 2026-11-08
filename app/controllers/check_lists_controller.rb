@@ -82,6 +82,17 @@ class CheckListsController < ApplicationController
     render json: { advisor: @check_list.advisor, added: added }
   end
 
+  # POST /check_lists/:id/finish: closes the list with the state saved so far
+  def finish
+    if @check_list.checked
+      redirect_to check_list_path(@check_list), notice: "Checklist was already finished"
+    else
+      finish_check_list
+      @check_list.save!
+      redirect_to check_list_path(@check_list), notice: "Checklist finished"
+    end
+  end
+
   # Check checklist.
   def update
     counts = params.dig(:check_list, :counts)
@@ -96,16 +107,7 @@ class CheckListsController < ApplicationController
     end
 
     if ActiveModel::Type::Boolean.new.cast(check_list_params[:checked])
-      @check_list.checked = true
-      # Mark previous missing items as found and add comment.
-      unmark_missing_items(@check_list)
-      # Mark items as missing and add comment.
-      mark_missing_items(@check_list)
-      #
-      # TODO: Send mqtt message, when checklist is finished.
-      Wink::MqttClient.send_message(
-        "'#{@check_list.advisor}' finished '#{@check_list.event.name}' checklist for '#{@check_list.case.name}'"
-      )
+      finish_check_list
     else
       @check_list.checked = false
     end
@@ -129,6 +131,17 @@ class CheckListsController < ApplicationController
   end
 
   private
+
+  def finish_check_list
+    @check_list.checked = true
+    # Mark previous missing items as found and add comment.
+    unmark_missing_items(@check_list)
+    # Mark items as missing and add comment.
+    mark_missing_items(@check_list)
+    Wink::MqttClient.send_message(
+      "'#{@check_list.advisor}' finished '#{@check_list.event.name}' checklist for '#{@check_list.case.name}'"
+    )
+  end
 
   def find_check_list
     @check_list = CheckList.find(params[:id])
