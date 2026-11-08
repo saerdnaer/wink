@@ -43,21 +43,22 @@
       %tbody
         - rows.each do |row|
           %tr{class: row.status}
-            %td
-              = row.name
-              - if row.details.present?
-                %small.item_details= row.details
+            %td= row.name
             - [ [ row.items_a, @case_a ], [ row.items_b, @case_b ] ].each do |items, kit|
               %td.count
                 - if items.empty?
                   \–
                 - else
                   %details
-                    %summary= "#{items.size}×"
+                    %summary
+                      = "#{items.size}×"
+                      - details = row.details(items)
+                      - if details.present?
+                        %small.item_details= details
                     %ul
                       - items.each do |item|
                         %li
-                          %a{href: item_path(item)}= [ item.inventory_number, item.serial_number.presence, ("broken" if item.broken), ("missing" if item.missing) ].compact_blank.join(" · ").presence || "##{item.id}"
+                          %a{href: item_path(item)}= [ item.inventory_number, (item.serial_number unless item.serial_number.blank? || item.serial_number == "n.a."), ("broken" if item.broken), ("missing" if item.missing) ].compact_blank.join(" · ").presence || "##{item.id}"
             %td.count
               - case row.status
               - when :only_a
@@ -65,6 +66,6 @@
               - when :only_b
                 = "only in #{@case_b.name}"
               - when :different
-                = format("%+d", row.count_b - row.count_a)
+                = row.models_differ? ? "other model" : format("%+d", row.count_b - row.count_a)
               - else
                 \=

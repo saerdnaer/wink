@@ -28,11 +28,23 @@ RSpec.describe "Comparing two sets" do
       expect(rows).to eq("XLR cable" => :same, "Adapter" => :different, "Only in A" => :only_a, "Only in B" => :only_b)
     end
 
-    it "counts items with the same name but different models as different items" do
+    it "puts items with the same name but different models in one row and calls it different" do
+      add(kit_a, "Headphones", manufacturer: "Beyerdynamic", model: "DT770-M")
+      add(kit_b, "Headphones", manufacturer: "Philips", model: "Philips something")
+
+      row = CaseComparison.new(kit_a, kit_b).rows.sole
+      expect(row).to have_attributes(status: :different, models_differ?: true, count_a: 1, count_b: 1)
+      expect(row.details(row.items_a)).to eq "Beyerdynamic DT770-M"
+      expect(row.details(row.items_b)).to eq "Philips Philips something"
+    end
+
+    it "calls a row different when only some of the items have another model" do
       add(kit_a, "Cable", model: "3m")
+      add(kit_a, "Cable", model: "3m")
+      add(kit_b, "Cable", model: "3m")
       add(kit_b, "Cable", model: "5m")
 
-      expect(CaseComparison.new(kit_a, kit_b).rows.map(&:status)).to eq %i[only_a only_b]
+      expect(CaseComparison.new(kit_a, kit_b).rows.sole.status).to eq :different
     end
 
     it "ignores case, spaces and a model of \"-\"" do
@@ -110,6 +122,25 @@ RSpec.describe "Comparing two sets" do
 
       get "/cases/#{kit_a.id}"
       expect(response.body).to include("/cases/compare?a=#{kit_a.id}")
+    end
+
+    it "shows the models of both sides in one row" do
+      add(kit_a, "Headphones", manufacturer: "Beyerdynamic", model: "DT770-M")
+      add(kit_b, "Headphones", manufacturer: "Philips", model: "Philips something")
+
+      get "/cases/compare", params: { a: kit_a.id, b: kit_b.id }
+
+      expect(response.body.scan(">Headphones<").size).to eq 1
+      expect(response.body).to include("Beyerdynamic DT770-M", "Philips Philips something", "other model")
+    end
+
+    it "does not show a serial number of n.a." do
+      add(kit_a, "Thing", inventory_number: "VOC9", serial_number: "n.a.")
+
+      get "/cases/compare", params: { a: kit_a.id, b: kit_b.id }
+
+      expect(response.body).to include("VOC9")
+      expect(response.body).not_to include("VOC9 · n.a.")
     end
   end
 end

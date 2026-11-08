@@ -2,13 +2,15 @@
 
 # Compares the contents of two sets (cases, kits) item by item.
 #
-# Items count as the same kind of item when they have the same product or, without
-# a product, the same name, manufacturer and model. Containers (shelves,
-# compartments, boxes, ...) and hidden items are left out.
+# Items with the same name (ignoring case and spaces) are put in the same row, and
+# so are items of the same product, even if they are named differently. A row is
+# "different" when the number of items differs or the items differ in manufacturer
+# or model. Containers (shelves, compartments, boxes, ...) and hidden items are
+# left out.
 class CaseComparison
   STATUSES = %i[same different only_a only_b].freeze
 
-  Row = Struct.new(:name, :details, :items_a, :items_b, keyword_init: true) do
+  Row = Struct.new(:name, :items_a, :items_b, keyword_init: true) do
     def count_a = items_a.size
     def count_b = items_b.size
 
@@ -16,14 +18,40 @@ class CaseComparison
       return :only_a if items_b.empty?
       return :only_b if items_a.empty?
 
-      count_a == count_b ? :same : :different
+      count_a == count_b && signature(items_a) == signature(items_b) ? :same : :different
     end
 
-    # items missing in B (positive) or more in B (negative)
-    def difference = count_a - count_b
+    # same number of items, but other manufacturers or models
+    def models_differ?
+      count_a == count_b && status == :different
+    end
+
+    # "Neutrik NC3, Neutrik other" of the items of one side
+    def details(items)
+      items.filter_map { |item| CaseComparison.details(item).presence }.uniq.join(", ")
+    end
+
+    private
+
+    def signature(items)
+      items.map { |item| CaseComparison.signature(item) }.sort
+    end
   end
 
   attr_reader :case_a, :case_b
+
+  def self.details(item)
+    [ item.manufacturer, item.model ].reject { |value| value.blank? || value == "-" }.join(" ")
+  end
+
+  def self.signature(item)
+    [ item.manufacturer, item.model ].map { |value| normalize(value) }
+  end
+
+  def self.normalize(value)
+    text = value.to_s.squish.downcase
+    text == "-" ? "" : text
+  end
 
   def initialize(case_a, case_b)
     @case_a = case_a
@@ -32,16 +60,12 @@ class CaseComparison
 
   def rows
     @rows ||= begin
-      grouped_a = group(case_a)
-      grouped_b = group(case_b)
-
-      rows = (grouped_a.keys | grouped_b.keys).map do |key|
-        items_a = grouped_a.fetch(key, [])
-        items_b = grouped_b.fetch(key, [])
-        first = (items_a + items_b).first
-        Row.new(name: first.name, details: details(first), items_a: items_a, items_b: items_b)
+      tagged = items_of(case_a).map { |item| [ :a, item ] } + items_of(case_b).map { |item| [ :b, item ] }
+      rows = cluster(tagged).map do |entries|
+        row_items = ->(side) { entries.select { |tag, _| tag == side }.map(&:last) }
+        Row.new(name: entries.first.last.name, items_a: row_items.call(:a), items_b: row_items.call(:b))
       end
-      rows.sort_by { |row| [ row.name.to_s.downcase, row.details.to_s.downcase ] }
+      rows.sort_by { |row| [ row.name.to_s.downcase, row.items_a.first&.id.to_i ] }
     end
   end
 
@@ -58,25 +82,28 @@ class CaseComparison
   private
 
   # Case#active_items would drop items without an item type (NOT IN with NULL)
-  def group(kit)
+  def items_of(kit)
     items = kit.not_deleted_items.not_hidden
     items = items.where(item_type_id: nil).or(items.where.not(item_type_id: ItemType.locations.select(:id)))
     # product_id is enough to match items, the products table is not needed
-    items.order(:name, :id).group_by { |item| key(item) }
+    items.order(:name, :id).to_a
   end
 
-  def key(item)
-    return [ :product, item.product_id ] if item.product_id
+  # Items that share a name or a product end up in the same cluster.
+  def cluster(tagged)
+    parent = {}
+    find = lambda do |key|
+      parent[key] ||= key
+      parent[key] = find.call(parent[key]) unless parent[key] == key
+      parent[key]
+    end
 
-    [ :item, *[ item.name, item.manufacturer, item.model ].map { |value| normalize(value) } ]
-  end
+    tagged.map(&:last).each do |item|
+      name_key = [ :name, self.class.normalize(item.name) ]
+      find.call(name_key)
+      parent[find.call([ :product, item.product_id ])] = find.call(name_key) if item.product_id
+    end
 
-  def normalize(value)
-    text = value.to_s.squish.downcase
-    text == "-" ? "" : text
-  end
-
-  def details(item)
-    [ item.manufacturer, item.model ].reject { |value| value.blank? || value == "-" }.join(" ")
+    tagged.group_by { |_, item| find.call([ :name, self.class.normalize(item.name) ]) }.values
   end
 end
