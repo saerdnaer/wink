@@ -96,6 +96,37 @@ aside.check_lists {
   background: #f4f4f4;
 }
 
+// "save before leaving?" dialog of the check list edit page
+.leave_modal {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+
+  .leave_modal_box {
+    box-sizing: border-box;
+    width: 28em;
+    max-width: 90%;
+    padding: 1em 1.5em;
+    background: white;
+    border: 2px solid black;
+  }
+
+  .leave_modal_actions a {
+    display: inline-block;
+    margin: 0.3em 0.3em 0 0;
+    padding: 0.3em 0.6em;
+  }
+
+  .leave_modal_error { color: #c00; }
+}
+
 // check list: inventory number next to the item name, deep link target
 .checklist_item .inventory_number {
   margin-left: 0.5em;

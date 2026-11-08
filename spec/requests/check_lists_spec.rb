@@ -199,4 +199,20 @@ RSpec.describe "Check lists" do
       expect(response.body).to include("check_list_intro", "Go through the set")
     end
   end
+
+  describe "result page: unsaved changes" do
+    let(:event) { Event.create!(name: "ev", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
+    let!(:check_list) { CheckList.create!(advisor: "andi") }
+
+    before do
+      EventCase.create!(event: event, case: case_record, check_list: check_list)
+      CheckListItem.create!(check_list: check_list, item: item, checked: true)
+    end
+
+    it "carries the data the browser needs to compare with its local copy" do
+      get "/check_lists/#{check_list.id}"
+
+      expect(response.body).to include("unsaved_notice", "data-edit-url", "data-check-list-id='#{check_list.id}'")
+    end
+  end
 end

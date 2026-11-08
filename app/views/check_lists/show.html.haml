@@ -2,6 +2,9 @@
 
 %h2= "Checklist #{@check_list.case.name} - (#{@check_list.event.name})"
 
+-# filled by check_list_offline.js when this device has unsaved changes for this list
+#unsaved_notice.offline_banner{style: "display:none", data: { check_list_id: @check_list.id, edit_url: edit_check_list_path(@check_list), state: @check_list.check_list_items.to_h { |cli| [cli.id, cli.checked] }.to_json }}
+
 %ol.properties
   %li
     %label Advisor:
