@@ -854,3 +854,29 @@ h3.section_heading .section_edit {
 table tr.check_state_finished td { background: #cdeac4; }
 table tr.check_state_in_progress td { background: #e6f9de; }
 
+// countable items on the check list: field for the counted pieces
+.count_field {
+  display: block;
+  margin: 4px 10px 0;
+  font-size: 0.85em;
+
+  label { display: inline; margin-right: 0.4em; }
+  input { width: 4.5em; }
+  .count_note { margin-left: 0.5em; color: #555; }
+
+  &.count_over .count_note { color: #b30000; font-weight: bold; }
+  &.count_under .count_note { color: #9a5b00; font-weight: bold; }
+  &.count_ok .count_note { color: #1b5e00; }
+}
+
+.stack_summary .count_field {
+  margin: 4px 0 0;
+
+  .count_note { display: inline; }
+}
+
+table.count_results {
+  tr.count_over td { background: #fdeaea; }
+  tr.count_under td { background: #fff3c4; }
+}
+

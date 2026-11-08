@@ -42,6 +42,23 @@ class CheckList < ApplicationRecord
     { checked: shown.count(&:checked), total: shown.size }
   end
 
+  # Counted pieces of countable items compared with the number expected (identical
+  # items count as one entry per piece). Only entries that were counted show up.
+  CountResult = Struct.new(:name, :counted, :expected, keyword_init: true) do
+    def difference = counted - expected
+  end
+
+  def count_results
+    entries = check_list_items.select { |entry| entry.countable? && !entry.item.deleted? }
+    results = entries.group_by { |entry| entry.item.name.to_s.squish.downcase }.filter_map do |_name, group|
+      counted = group.filter_map(&:count)
+      next if counted.empty?
+
+      CountResult.new(name: group.first.item.name, counted: counted.sum, expected: group.size)
+    end
+    results.sort_by { |result| result.name.to_s.downcase }
+  end
+
   # A check list is started as soon as one item was checked (or it was finished).
   def started?
     checked || check_list_items.any?(&:checked)

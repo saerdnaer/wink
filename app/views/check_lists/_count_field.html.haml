@@ -1,0 +1,7 @@
+-# locals: (cli:, expected:)
+-# Number of pieces counted for a countable item; empty = not counted.
+%span.count_field{data: { expected: expected }}
+  %label{for: "count_#{cli.id}"} counted
+  %input{type: "number", min: 0, step: 1, inputmode: "numeric", id: "count_#{cli.id}",
+         name: "check_list[counts][#{cli.id}]", value: cli.count, placeholder: expected, data: { expected: expected }}
+  %span.count_note

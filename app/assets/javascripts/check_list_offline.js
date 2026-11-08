@@ -19,7 +19,7 @@ $(function() {
       var saved = JSON.parse(window.localStorage.getItem(notice_key));
       if (saved && saved.changes && Date.now() - saved.savedAt < MAX_AGE) {
         Object.keys(saved.changes).forEach(function(id) {
-          if (id in server_state && server_state[id] !== saved.changes[id]) { unsaved += 1; }
+          if (id in server_state && String(server_state[id]) !== String(saved.changes[id])) { unsaved += 1; }
         });
       }
     } catch (e) { /* ignore */ }
@@ -41,6 +41,9 @@ $(function() {
 
   var KEY = 'wink:check_list:' + form.data('check-list-id');
   var inputs = form.find('input[type="checkbox"][name="check_list[checked_check_list_items][]"]');
+  // counted pieces of countable items (check_list[counts][<id>]), stored as "count:<id>"
+  var counts = form.find('input[name^="check_list[counts]"]');
+  var count_id = function(input) { return /\[counts\]\[(\d+)\]/.exec(input.name)[1]; };
   var restoring = false;
 
   var storage_get = function() {
@@ -66,6 +69,9 @@ $(function() {
     var changes = {};
     inputs.each(function() {
       if (this.checked !== this.defaultChecked) { changes[this.value] = this.checked; }
+    });
+    counts.each(function() {
+      if (this.value !== this.defaultValue) { changes['count:' + count_id(this)] = this.value; }
     });
     return changes;
   };
@@ -99,6 +105,13 @@ $(function() {
   var stored = storage_get();
   restoring = true;
   Object.keys(stored).forEach(function(id) {
+    if (id.indexOf('count:') === 0) {
+      var count_input = counts.filter(function() { return count_id(this) === id.substring(6); });
+      if (count_input.length && count_input[0].defaultValue !== String(stored[id])) {
+        count_input.val(stored[id]).trigger('change');
+      }
+      return;
+    }
     var input = inputs.filter(function() { return this.value === id; });
     if (!input.length || input[0].defaultChecked === stored[id]) { return; }
     input.prop('checked', stored[id]).trigger('change');
@@ -107,6 +120,7 @@ $(function() {
   persist();
 
   inputs.on('change', persist);
+  counts.on('input change', persist);
 
   banner.on('click', '.offline_save', function(event) {
     event.preventDefault();
@@ -118,6 +132,9 @@ $(function() {
     restoring = true;
     inputs.each(function() {
       if (this.checked !== this.defaultChecked) { $(this).prop('checked', this.defaultChecked).trigger('change'); }
+    });
+    counts.each(function() {
+      if (this.value !== this.defaultValue) { $(this).val(this.defaultValue).trigger('change'); }
     });
     restoring = false;
     persist();
@@ -143,6 +160,7 @@ $(function() {
   // marks the current checkbox state as saved
   var mark_saved = function() {
     inputs.each(function() { this.defaultChecked = this.checked; });
+    counts.each(function() { this.defaultValue = this.value; });
     persist();
   };
 

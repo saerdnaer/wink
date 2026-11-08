@@ -3,7 +3,7 @@
 %h2= "Checklist #{@check_list.case.name} - (#{@check_list.event.name})"
 
 -# filled by check_list_offline.js when this device has unsaved changes for this list
-#unsaved_notice.offline_banner{style: "display:none", data: { check_list_id: @check_list.id, edit_url: edit_check_list_path(@check_list), state: @check_list.check_list_items.to_h { |cli| [cli.id, cli.checked] }.to_json }}
+#unsaved_notice.offline_banner{style: "display:none", data: { check_list_id: @check_list.id, edit_url: edit_check_list_path(@check_list), state: @check_list.check_list_items.includes(:item).each_with_object({}) { |cli, state| state[cli.id] = cli.checked; state["count:#{cli.id}"] = cli.count.to_s if cli.countable? }.to_json }}
 
 %ol.properties
   %li
@@ -35,6 +35,24 @@
       %label Actions
       %span.actions
         %a{href: edit_check_list_path(@check_list)} Check me!
+
+- count_results = @check_list.count_results
+- if count_results.any?
+  %h3 Counted items
+  %table.count_results
+    %thead
+      %tr
+        %th Item
+        %th Counted
+        %th Expected
+        %th Difference
+    %tbody
+      - count_results.each do |result|
+        %tr{class: (result.difference.positive? ? "count_over" : (result.difference.negative? ? "count_under" : "count_ok"))}
+          %td= result.name
+          %td= result.counted
+          %td= result.expected
+          %td= result.difference.zero? ? "as expected" : format("%+d", result.difference)
 
 %ul
   -# TODO: Move items select to controller

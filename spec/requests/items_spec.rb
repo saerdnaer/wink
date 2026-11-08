@@ -83,4 +83,24 @@ RSpec.describe "Item pages" do
       expect(response.body).not_to include("for past")
     end
   end
+
+  describe "countable flag" do
+    it "can be set in the item form" do
+      get "/items/#{item.id}/edit"
+      expect(response.body).to include("item[countable]")
+
+      patch "/items/#{item.id}", params: { item: { name: "Kabel", case_id: case_record.id, countable: "1" } }
+
+      expect(item.reload.countable).to be true
+    end
+
+    it "is not countable by default and shows on the item page when set" do
+      expect(item.countable).to be false
+
+      item.update!(countable: true)
+      get "/items/#{item.id}"
+
+      expect(response.body).to include("Countable")
+    end
+  end
 end

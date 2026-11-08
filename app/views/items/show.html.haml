@@ -68,6 +68,10 @@
       %span.mark.missing= @item.missing
     - else
       %span.missing= @item.missing
+  - if @item.countable
+    %li
+      %label Countable
+      %span.countable yes
   %li
     %label Deleted
     %span.deleted= @item.deleted

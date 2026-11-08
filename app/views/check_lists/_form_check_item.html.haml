@@ -52,9 +52,12 @@
                     %span.stack_progress= "#{stack.count(&:checked)}/#{stack.size}"
                     %span.stack_label checked
                   %a.stack_toggle{href: "#", title: "Fold / unfold the single items"} unfold
+                - if stack.all? { |cli| cli.item.countable }
+                  -# the count of a stack of countable items is kept on its first entry
+                  = render partial: 'count_field', locals: { cli: stack.min_by(&:id), expected: stack.size }
               %div.stack_items
                 - stack.each do |cli|
-                  = render partial: 'checklist_card', locals: { cli: cli }
+                  = render partial: 'checklist_card', locals: { cli: cli, count_input: !stack.all? { |entry| entry.item.countable } }
 
 .noborder
   %table

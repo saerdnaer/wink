@@ -25,7 +25,8 @@ class ItemSerializer
       "wink:broken" => item.broken,
       "wink:missing" => item.missing,
       "wink:reused" => item.reused,
-      "wink:hidden" => item.hidden
+      "wink:hidden" => item.hidden,
+      "wink:countable" => (true if item.countable)
     }
     json.merge!(detail_properties(item, urls)) if detail
 

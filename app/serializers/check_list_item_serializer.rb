@@ -11,6 +11,7 @@ class CheckListItemSerializer
                           "assetId" => item.inventory_number, "serialNumber" => item.serial_number },
       "description" => check_list_item.comment,
       "wink:checked" => check_list_item.checked,
+      "wink:count" => check_list_item.count,
       "wink:broken" => check_list_item.broken,
       "wink:missing" => check_list_item.missing
     )

@@ -21,4 +21,5 @@
 //= require remember_username
 //= require check_list_offline
 //= require check_list_sections
+//= require check_list_counts
 

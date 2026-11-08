@@ -318,4 +318,115 @@ RSpec.describe "Check lists" do
       expect(response.body).not_to include("section_edit")
     end
   end
+
+  describe "counting countable items" do
+    let(:event) { Event.create!(name: "ev", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
+    let!(:check_list) { CheckList.create!(advisor: "andi") }
+    let(:entries) { check_list.check_list_items.reload }
+
+    before { EventCase.create!(event: event, case: case_record, check_list: check_list) }
+
+    def add_entry(name, countable: true, **attrs)
+      entry_item = Item.create!(name: name, case: case_record, countable: countable)
+      CheckListItem.create!(check_list: check_list, item: entry_item, **attrs)
+    end
+
+    def save_counts(counts, checked: [])
+      patch "/check_lists/#{check_list.id}",
+            params: { check_list: { checked: "false", checked_check_list_items: checked, counts: counts } }
+    end
+
+    it "offers a count field for countable items only" do
+      add_entry("Battery AA")
+      add_entry("Cable", countable: false)
+
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body.scan("count_field").size).to eq 1
+      expect(response.body).to include("placeholder='1'", "check_list[counts][")
+    end
+
+    it "counts a stack of countable items once, against the number of items in the stack" do
+      first = add_entry("Adapter")
+      2.times { add_entry("Adapter") }
+
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body.scan("count_field").size).to eq 1
+      expect(response.body).to include("name='check_list[counts][#{first.id}]'", "placeholder='3'")
+    end
+
+    it "stores the counted number, normally nil" do
+      entry = add_entry("Battery AA")
+      expect(entry.count).to be_nil
+
+      save_counts({ entry.id => "7" })
+
+      expect(entry.reload.count).to eq 7
+    end
+
+    it "empties the count with a blank value" do
+      entry = add_entry("Battery AA", count: 3)
+
+      save_counts({ entry.id => "" })
+
+      expect(entry.reload.count).to be_nil
+    end
+
+    it "keeps the old value for input that is no number and ignores items that are not countable" do
+      entry = add_entry("Battery AA", count: 3)
+      plain = add_entry("Cable", countable: false)
+
+      save_counts({ entry.id => "lots", plain.id => "5" })
+
+      expect(entry.reload.count).to eq 3
+      expect(plain.reload.count).to be_nil
+    end
+
+    it "leaves counts alone when the form sends none" do
+      entry = add_entry("Battery AA", count: 3)
+
+      patch "/check_lists/#{check_list.id}", params: { check_list: { checked: "false", checked_check_list_items: [ entry.id.to_s ] } }
+
+      expect(entry.reload).to have_attributes(count: 3, checked: true)
+    end
+
+    it "validates the count" do
+      entry = add_entry("Battery AA")
+      entry.count = -1
+
+      expect(entry).not_to be_valid
+    end
+
+    it "compares the counted with the expected number on the result page" do
+      entry = add_entry("Adapter", count: 5)
+      2.times { add_entry("Adapter") }
+      add_entry("Battery", count: 1)
+      add_entry("Never counted")
+
+      get "/check_lists/#{check_list.id}"
+
+      expect(entry.check_list.count_results.map(&:to_a)).to eq [ [ "Adapter", 5, 3 ], [ "Battery", 1, 1 ] ]
+      expect(response.body).to include("Counted items", "+2", "as expected")
+      expect(response.body).not_to include("Never counted")
+    end
+
+    it "gives the browser the counts the server knows" do
+      entry = add_entry("Battery AA", count: 4)
+
+      get "/check_lists/#{check_list.id}"
+
+      expect(response.body).to include("&quot;count:#{entry.id}&quot;:&quot;4&quot;")
+    end
+
+    it "is part of the JSON-LD" do
+      entry = add_entry("Battery AA", count: 4)
+
+      get "/api/v1/check_lists/#{check_list.id}"
+
+      listed = JSON.parse(response.body)["itemListElement"].find { |e| e["wink:checked"] == false }
+      expect(listed["wink:count"]).to eq 4
+      expect(entry.item.countable).to be true
+    end
+  end
 end

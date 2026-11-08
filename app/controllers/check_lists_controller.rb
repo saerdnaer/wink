@@ -72,8 +72,11 @@ class CheckListsController < ApplicationController
 
   # Check checklist.
   def update
-    CheckList.find(params[:id]).check_list_items.each do |cli|
+    counts = params.dig(:check_list, :counts)
+
+    CheckList.find(params[:id]).check_list_items.includes(:item).find_each do |cli|
       cli.checked = (checked_check_list_params[:checked_check_list_items]&.include?(cli.id.to_s) || false)
+      cli.count = parse_count(counts[cli.id.to_s], cli.count) if counts && cli.countable? && counts.key?(cli.id.to_s)
 
       next if cli.save!
 
@@ -121,6 +124,14 @@ class CheckListsController < ApplicationController
 
   def check_list_params
     params.expect(check_list: %i[comment advisor checked])
+  end
+
+  # "" -> nil (not counted), "12" -> 12, anything else keeps the old value
+  def parse_count(value, old)
+    text = value.to_s.strip
+    return nil if text.empty?
+
+    text.match?(/\A\d{1,6}\z/) ? text.to_i : old
   end
 
   def checked_check_list_params

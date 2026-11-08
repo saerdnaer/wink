@@ -44,3 +44,7 @@
 %p
   %label{for: 'missing'}= "Missing:"
   = f.check_box :missing
+%p
+  %label{for: 'item_countable'}= "Countable:"
+  %label.hint Adapters, batteries, ... can be counted on a check list
+  = f.check_box :countable
