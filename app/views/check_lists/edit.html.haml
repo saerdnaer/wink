@@ -10,8 +10,8 @@
   %p
     Go through the set and tick every item that is there and works.
     Tap an item to tick it. Identical items without inventory number are stacked
-    (e.g. <b>3×</b>): every tap ticks the next one, <i>show items</i> lists them
-    one by one. A double-click on a headline ticks a whole section.
+    (e.g. <b>3×</b>): every tap ticks the next one, a long press ticks all of them,
+    <i>unfold</i> lists them one by one. A double-click on a headline ticks a whole section.
   %p
     The filter finds items by name, model, inventory number or serial number.
     Broken or missing items stay marked on their card; add details on the
@@ -131,6 +131,11 @@
       var boxes = stack.find('input[type="checkbox"]');
       var checked = boxes.filter(':checked').length;
       stack.find('.stack_progress').text(checked + '/' + boxes.length);
+      // jQuery's .css() does not handle custom properties (older versions): set it natively
+      stack.find('.stack_bar').each(function() {
+        this.style.setProperty('--progress', Math.round(100 * checked / boxes.length) + '%');
+      });
+      stack.find('.stack_state').attr('title', checked + '/' + boxes.length + ' checked');
       stack.toggleClass('all_checked', checked == boxes.length);
       stack.toggleClass('partial', checked > 0 && checked < boxes.length);
     };
@@ -147,6 +152,11 @@
     $('.stack_summary').on('click keydown', function(event) {
       if (event.type == 'keydown' && event.key != 'Enter' && event.key != ' ') { return; }
       event.preventDefault();
+      // the click that ends a long press must not check/uncheck anything again
+      if (event.type == 'click' && $(this).data('long_pressed')) {
+        $(this).data('long_pressed', false);
+        return;
+      }
       var stack = $(this).closest('.checklist_stack');
       var inputs = stack.find('.checklist_item:not(.filtered_out) input[type="checkbox"]');
       var open = inputs.filter(':not(:checked)');
@@ -158,12 +168,43 @@
       }
     });
 
+    // Long press (or holding the mouse button) on a stack checks all its items at once.
+    var LONG_PRESS_MS = 600;
+    $('.stack_summary').each(function() {
+      var summary = $(this);
+      var timer = null;
+      var start = null;
+
+      var cancel = function() { clearTimeout(timer); timer = null; };
+
+      summary.on('pointerdown', function(event) {
+        if (event.button > 0 || $(event.target).closest('.stack_toggle').length) { return; }
+        start = { x: event.clientX, y: event.clientY };
+        cancel();
+        timer = setTimeout(function() {
+          timer = null;
+          var inputs = summary.closest('.checklist_stack')
+                              .find('.checklist_item:not(.filtered_out) input[type="checkbox"]');
+          inputs.filter(':not(:checked)').prop('checked', true).trigger('change');
+          summary.data('long_pressed', true);
+          if (navigator.vibrate) { navigator.vibrate(30); }
+        }, LONG_PRESS_MS);
+      });
+      // scrolling or dragging is not a long press
+      summary.on('pointermove', function(event) {
+        if (timer && start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 10) { cancel(); }
+      });
+      summary.on('pointerup pointercancel pointerleave', cancel);
+      // no context menu / text selection from a long press on touch devices
+      summary.on('contextmenu', function(event) { if (summary.data('long_pressed')) { event.preventDefault(); } });
+    });
+
     $('.stack_toggle').click(function(event) {
       event.preventDefault();
       event.stopPropagation();
       var stack = $(this).closest('.checklist_stack');
       stack.toggleClass('expanded');
-      $(this).text(stack.hasClass('expanded') ? 'hide items' : 'show items');
+      $(this).text(stack.hasClass('expanded') ? 'fold' : 'unfold');
     });
 
     // Deep link (#VOC00618 or #2344): open the stack the item is in and highlight it
@@ -173,7 +214,7 @@
       var stack = $(target).closest('.checklist_stack');
       if (stack.length) {
         stack.addClass('expanded');
-        stack.find('.stack_toggle').text('hide items');
+        stack.find('.stack_toggle').text('fold');
       }
       $('.checklist_item.highlight').removeClass('highlight');
       $(target).closest('.checklist_item').addClass('highlight');

@@ -28,7 +28,7 @@
             - details = stack.map { |cli| [cli.item.manufacturer, cli.item.model].reject { |v| v.blank? || v == "-" }.join(" ") }.reject(&:blank?).uniq.join(" · ")
             - types = stack.map { |cli| cli.item.item_type&.name }.uniq
             %div.checklist_stack{data: { total: stack.size }}
-              %div.stack_summary{role: "button", tabindex: 0, title: "Click: check next item of the stack"}
+              %div.stack_summary{role: "button", tabindex: 0, title: "Click: check next item of the stack. Long press: check all"}
                 - if types.size == 1 && types.first
                   %span.item_type= types.first
                 %span.item_name
@@ -39,10 +39,12 @@
                 - if first.item
                   %span.item_parent= "↳ part of #{first.item.name}"
                 %span.stack_status
-                  %span.stack_state
+                  -# progress bar while checking; "2/2 checked" once everything is checked
+                  %span.stack_state{title: "#{stack.count(&:checked)}/#{stack.size} checked"}
+                    %span.stack_bar{style: "--progress: #{(100.0 * stack.count(&:checked) / stack.size).round}%"}
                     %span.stack_progress= "#{stack.count(&:checked)}/#{stack.size}"
-                    checked
-                  %a.stack_toggle{href: "#", title: "Show the single items"} show items
+                    %span.stack_label checked
+                  %a.stack_toggle{href: "#", title: "Fold / unfold the single items"} unfold
               %div.stack_items
                 - stack.each do |cli|
                   = render partial: 'checklist_card', locals: { cli: cli }

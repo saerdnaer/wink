@@ -464,7 +464,7 @@ input[type=submit]:hover, input[type=submit]:focus {
 }
 .checklist_group {
     input:checked + label {
-        background-color: #33dd00;
+        background-color: #28c3ab;
     }
     input[type=checkbox] {
         display: none;
@@ -537,8 +537,8 @@ input[type=submit]:hover, input[type=submit]:focus {
 
     // checked items: keep the secondary lines readable on the green background
     input:checked + label {
-        .item_details, .item_parent, .item_ids { color: #1b5e00; }
-        .item_type { background: #b4f09f; }
+        .item_details, .item_parent, .item_ids { color: #0e4a40; }
+        .item_type { background: #8fe3d3; }
     }
 }
 
@@ -572,6 +572,10 @@ h3.section_heading {
 
     // collapsed: only the summary card (drawn as a pile of cards)
     .stack_summary {
+        // long press checks the whole stack: no text selection / callout menu
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
         box-sizing: border-box;
         padding: 6px 10px;
         border: 1px solid black;
@@ -620,15 +624,40 @@ h3.section_heading {
             justify-content: space-between;
             align-items: baseline;
 
-            .stack_state, .stack_progress { display: inline; }
+            .stack_state { display: inline-flex; align-items: center; }
+            .stack_progress { display: inline; margin-left: 0.5em; }
+            .stack_label { display: none; }
+
+            // progress bar while not everything is checked
+            .stack_bar {
+                display: inline-block;
+                box-sizing: border-box;
+                width: 110px;
+                height: 10px;
+                border: 1px solid #28c3ab;
+                border-radius: 5px;
+                background: linear-gradient(to right, #28c3ab var(--progress, 0%), #e4e4e4 var(--progress, 0%));
+            }
         }
     }
 
-    &.partial .stack_summary { background: #e6f9de; }
-    &.all_checked .stack_summary { background: #33dd00; }
+    // partly checked: diagonal teal stripes (/ / / /), text darkened to stay readable
+    &.partial .stack_summary {
+        background: repeating-linear-gradient(-45deg, #fff 0, #fff 7px, #9fe3d6 7px, #9fe3d6 14px);
+        .item_details, .item_parent, .stack_status { color: #222; }
+    }
+
+    // everything checked: the bar is replaced by "2/2 checked" (the word "checked" only appears now)
+    &.all_checked .stack_summary .stack_status {
+        .stack_bar { display: none; }
+        .stack_progress { margin-left: 0; }
+        .stack_label { display: inline; margin-left: 0.25em; }
+    }
+
+    &.all_checked .stack_summary { background: #28c3ab; }
     &.all_checked .stack_summary .item_details,
     &.all_checked .stack_summary .item_parent,
-    &.all_checked .stack_summary .stack_status { color: #1b5e00; }
+    &.all_checked .stack_summary .stack_status { color: #0e4a40; }
 
     .stack_items { display: none; }
 
