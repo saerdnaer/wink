@@ -3,6 +3,12 @@
 %h2 Products
 
 %a{href: new_product_path} create new product
+
+= form_with url: from_url_products_path, method: :post, local: true, class: "from_url_form" do
+  = label_tag :create_product_from_url, "Create product from URL:"
+  = url_field_tag :url, nil, id: "create_product_from_url", placeholder: "https://… (page with schema.org product data)", required: true, autocomplete: "off"
+  = submit_tag "Import", name: nil, data: { disable_with: "Importing…" }
+  %span.hint Paste a product page link: name, manufacturer, number, GTIN, price and image are read from its schema.org metadata.
 %table{border: 1}
   %thead
     %tr

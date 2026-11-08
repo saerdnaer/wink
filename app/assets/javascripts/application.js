@@ -16,6 +16,7 @@
 //= require jquery-ui
 //= require cable
 //= require menu
+//= require from_url
 //= require remember_username
 //= require check_list_offline
 

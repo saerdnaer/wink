@@ -647,6 +647,27 @@ h3.section_heading {
 }
 
 
+// flash messages
+.flash {
+  margin: 0.5em 0;
+  padding: 0.4em 0.8em;
+  border-left: 4px solid #28c3ab;
+  background: #eaf8f5;
+}
+
+.flash_alert {
+  border-left-color: #c00;
+  background: #fdeaea;
+}
+
+// input field "create product from URL"
+.from_url_form {
+  margin: 0.8em 0;
+
+  input[type=url] { width: 30em; max-width: 100%; }
+  .hint { display: block; margin-top: 0.2em; }
+}
+
 // product images
 img.product_image {
   float: right;

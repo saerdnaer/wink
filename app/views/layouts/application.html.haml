@@ -46,6 +46,8 @@
 
 
     #main
+      - flash.each do |type, message|
+        %div{class: "flash flash_#{type}", role: "status"}= message
       = yield
 
     #footer

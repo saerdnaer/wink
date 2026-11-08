@@ -15,6 +15,9 @@ Rails.application.routes.draw do
   resources :transports
 
   resources :products do
+    collection do
+      post :from_url
+    end
     member do
       get :image
     end
