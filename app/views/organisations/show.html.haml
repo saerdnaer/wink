@@ -1,0 +1,33 @@
+- content_for :title, "#{@organisation.name} - "
+
+%h2= @organisation.name
+
+- if @organisation.logo.present?
+  = image_tag image_organisation_path(@organisation), alt: @organisation.name, class: "image_large"
+
+%ol.properties
+  - { "Legal name" => @organisation.legal_name, "Description" => @organisation.description,
+      "E-mail" => @organisation.email, "Telephone" => @organisation.telephone,
+      "Address" => @organisation.address }.each do |label, value|
+    - next if value.blank?
+    %li
+      %label= label
+      %span= value
+  %li
+    %label Roles
+    %span
+      - if @organisation.roles.empty?
+        none
+      - @organisation.roles.each do |role|
+        %a.role_badge{href: organisations_path(role: role)}= role
+  - if @organisation.url.present?
+    %li
+      %label Web site
+      %span
+        %a{href: @organisation.url}= @organisation.url
+  %br
+  %li
+    %label Actions
+    %span.actions
+      %a{href: edit_organisation_path(@organisation)} edit
+      = link_to 'delete', organisation_path(@organisation), data: { confirm: "Delete organisation '#{@organisation.name}'?" }, method: :delete

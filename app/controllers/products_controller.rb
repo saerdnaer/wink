@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ProductsController < ApplicationController
+  include ImageUpload
+
   before_action :find_product, except: %i[index create new from_url]
 
   def index
@@ -52,7 +54,7 @@ class ProductsController < ApplicationController
   def create
     @product = Product.new(product_params)
 
-    if save_with_image(@product)
+    if save_with_image(@product, store: ProductImageStore, attribute: :image)
       redirect_to product_path(@product), notice: "Created product #{@product.name}"
     else
       render action: "new", status: :unprocessable_content
@@ -62,7 +64,7 @@ class ProductsController < ApplicationController
   def update
     @product.assign_attributes(product_params)
 
-    if save_with_image(@product)
+    if save_with_image(@product, store: ProductImageStore, attribute: :image)
       redirect_to product_path(@product), notice: "Updated '#{@product.name}'"
     else
       render action: "edit", status: :unprocessable_content
@@ -80,12 +82,7 @@ class ProductsController < ApplicationController
 
   # GET /products/:id/image
   def image
-    return head :not_found unless ProductImageStore.exist?(@product.image)
-
-    expires_in 1.hour, public: true
-    send_file ProductImageStore.path(@product.image),
-              type: ProductImageStore.content_type(@product.image) || "application/octet-stream",
-              disposition: "inline"
+    send_stored_image(ProductImageStore, @product.image)
   end
 
   private
@@ -120,32 +117,4 @@ class ProductsController < ApplicationController
   rescue SafeFetch::Error => e
     "The image could not be downloaded (#{e.message})."
   end
-
-  # Validates and stores an uploaded image (product[image]) or removes the current
-  # one (remove_image=1), then saves the product. A rejected save leaves no files behind.
-  # rubocop:disable Naming/PredicateMethod
-  def save_with_image(product)
-    upload = params.dig(:product, :image).presence
-    remove = ActiveModel::Type::Boolean.new.cast(params[:remove_image])
-    old_image = product.image_was
-
-    error = ProductImageStore.check(upload) if upload
-    unless product.valid? && error.nil?
-      product.errors.add(:image, error) if error
-      return false
-    end
-
-    new_image = ProductImageStore.store(upload) if upload
-    product.image = new_image if new_image
-    product.image = nil if remove && !new_image
-
-    if product.save
-      ProductImageStore.delete(old_image) if old_image.present? && old_image != product.image
-      true
-    else
-      ProductImageStore.delete(new_image)
-      false
-    end
-  end
-  # rubocop:enable Naming/PredicateMethod
 end

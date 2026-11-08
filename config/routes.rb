@@ -14,6 +14,15 @@ Rails.application.routes.draw do
   get "/transports/import", to: "transports#import_transports"
   resources :transports
 
+  resources :organisations do
+    collection do
+      post :from_url
+    end
+    member do
+      get :image
+    end
+  end
+
   resources :products do
     collection do
       post :from_url
@@ -42,6 +51,7 @@ Rails.application.routes.draw do
       resources :items, only: %i[index show]
       resources :products, only: %i[index show]
       resources :check_lists, only: %i[index show]
+      resources :organisations, only: %i[index show]
     end
   end
 

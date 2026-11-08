@@ -1,0 +1,41 @@
+%p
+  %label{for: 'organisation_name'}= "Name:"
+  %label.hint AUER Packaging
+  = f.text_field :name, required: true
+%p
+  %label{for: 'organisation_legal_name'}= "Legal name:"
+  %label.hint AUER Packaging GmbH
+  = f.text_field :legal_name
+%p
+  %label= "Roles:"
+  %label.hint What the organisation is for us. An organisation can have several roles.
+  = hidden_field_tag "organisation[roles][]", "", id: nil
+  - Organisation::ROLES.each do |role|
+    %label.inline_choice{for: "organisation_roles_#{role}"}
+      = check_box_tag "organisation[roles][]", role, f.object.roles.include?(role), id: "organisation_roles_#{role}"
+      = role
+%p
+  %label{for: 'organisation_description'}= "Description:"
+  = f.text_area :description, rows: 3
+%p
+  %label{for: 'organisation_url'}= "Web site:"
+  = f.text_field :url
+%p
+  %label{for: 'organisation_email'}= "E-mail:"
+  = f.text_field :email
+%p
+  %label{for: 'organisation_telephone'}= "Telephone:"
+  = f.text_field :telephone
+%p
+  %label{for: 'organisation_address'}= "Address:"
+  = f.text_area :address, rows: 3
+%p
+  %label{for: 'organisation_logo'}= "Logo:"
+  %label.hint PNG, JPEG, GIF or WebP, up to 5 MB
+  - if f.object.logo.present?
+    %span.image_current
+      = image_tag image_organisation_path(f.object), alt: f.object.name, class: "image_thumb"
+      %label.inline
+        = check_box_tag "remove_image", "1", false
+        remove logo
+  = f.file_field :logo, accept: "image/png,image/jpeg,image/gif,image/webp"

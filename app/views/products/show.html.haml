@@ -3,7 +3,7 @@
 %h2= @product.name
 
 - if @product.image.present?
-  = image_tag image_product_path(@product), alt: @product.name, class: "product_image"
+  = image_tag image_product_path(@product), alt: @product.name, class: "image_large"
 
 %ol.properties
   - { "Description" => @product.description, "Manufacturer" => @product.manufacturer,

@@ -38,8 +38,8 @@
   %label{for: 'product_image'}= "Image:"
   %label.hint PNG, JPEG, GIF or WebP, up to 5 MB
   - if f.object.image.present?
-    %span.product_image_current
-      = image_tag image_product_path(f.object), alt: f.object.name, class: "product_image_thumb"
+    %span.image_current
+      = image_tag image_product_path(f.object), alt: f.object.name, class: "image_thumb"
       %label.inline
         = check_box_tag "remove_image", "1", false
         remove image

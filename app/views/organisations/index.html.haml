@@ -1,0 +1,43 @@
+- content_for :title, "Organisations - "
+
+%h2 Organisations
+
+%a{href: new_organisation_path} create new organisation
+
+= form_with url: from_url_organisations_path, method: :post, local: true, class: "from_url_form" do
+  = label_tag :create_organisation_from_url, "Create organisation from URL:"
+  = url_field_tag :url, nil, id: "create_organisation_from_url", placeholder: "https://… (web site with schema.org organisation data)", required: true, autocomplete: "off"
+  = submit_tag "Import", name: nil, data: { disable_with: "Importing…" }
+  %span.hint Paste the link of a web site: name, description, contact data and logo are read from its schema.org metadata.
+
+%p.role_filter
+  Roles:
+  = link_to "all", organisations_path, class: ("active_filter" unless @role)
+  - Organisation::ROLES.each do |role|
+    = link_to role, organisations_path(role: role), class: ("active_filter" if @role == role)
+
+%table{border: 1}
+  %thead
+    %tr
+      %th.image Logo
+      %th.name Name
+      %th.roles Roles
+      %th.url Web site
+      %th.actions Actions
+  %tbody
+    - @organisations.each do |organisation|
+      %tr
+        %td
+          - if organisation.logo.present?
+            = image_tag image_organisation_path(organisation), alt: organisation.name, class: "image_thumb"
+        %td.no_color
+          %a{href: organisation_path(organisation)}= organisation.name
+        %td.no_color
+          - organisation.roles.each do |role|
+            %a.role_badge{href: organisations_path(role: role)}= role
+        %td.no_color
+          - if organisation.url.present?
+            %a{href: organisation.url}= organisation.url
+        %td
+          %a{href: organisation_path(organisation)} show
+          %a{href: edit_organisation_path(organisation)} edit

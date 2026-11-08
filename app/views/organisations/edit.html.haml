@@ -1,0 +1,10 @@
+- content_for :title, "Edit #{@organisation.name} - "
+
+%h2= "Edit '#{@organisation.name}'"
+= render partial: 'record_errors', locals: { record: @organisation }
+
+= form_for(@organisation, as: :organisation) do |f|
+  = render partial: 'form', locals: { f: f }
+
+  = f.submit "Save"
+  = link_to 'Cancel', organisation_path(@organisation)

@@ -22,7 +22,7 @@
       %tr
         %td
           - if product.image.present?
-            = image_tag image_product_path(product), alt: product.name, class: "product_image_thumb"
+            = image_tag image_product_path(product), alt: product.name, class: "image_thumb"
         %td.no_color
           %a{href: product_path(product)}= product.name
         %td.no_color= product.manufacturer

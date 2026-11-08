@@ -668,23 +668,41 @@ h3.section_heading {
   .hint { display: block; margin-top: 0.2em; }
 }
 
-// product images
-img.product_image {
+// product and organisation images
+img.image_large {
   float: right;
   max-width: 40%;
   max-height: 20em;
   margin: 0 0 1em 1em;
 }
 
-img.product_image_thumb {
+img.image_thumb {
   max-width: 6em;
   max-height: 4em;
   vertical-align: middle;
 }
 
-.product_image_current {
+.image_current {
   display: block;
   margin: 0.3em 0;
 
   label.inline { display: inline; margin-left: 1em; }
+}
+
+// organisations: roles
+a.role_badge {
+  display: inline-block;
+  margin-right: 0.3em;
+  padding: 0 0.6em;
+  border-radius: 1em;
+}
+
+.role_filter .active_filter {
+  background-color: #28c3ab;
+  color: black;
+}
+
+label.inline_choice {
+  display: inline;
+  margin-right: 1.2em;
 }

@@ -37,6 +37,8 @@
           = active_link_to('items', items_path)
         %li
           = active_link_to('products', products_path)
+        %li
+          = active_link_to('organisations', organisations_path)
 
       - if controller.controller_name == 'cases'
         %ul.submenu
