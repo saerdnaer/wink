@@ -87,6 +87,15 @@ aside.check_lists {
   background: #fff6d6;
 }
 
+// intro text on top of the check list edit page
+.check_list_intro {
+  max-width: 50em;
+  margin: 0.5em 0 1em;
+  padding: 0.2em 1em;
+  border-left: 4px solid #28c3ab;
+  background: #f4f4f4;
+}
+
 // check list: inventory number next to the item name, deep link target
 .checklist_item .inventory_number {
   margin-left: 0.5em;

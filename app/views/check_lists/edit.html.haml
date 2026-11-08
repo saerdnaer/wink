@@ -6,6 +6,22 @@
   at
   %a{href: event_path(@check_list.event), target: '_blank'}= @check_list.event.name
 
+%div.check_list_intro
+  %p
+    Go through the set and tick every item that is there and works.
+    Tap an item to tick it. Identical items without inventory number are stacked
+    (e.g. <b>3×</b>): every tap ticks the next one, <i>show items</i> lists them
+    one by one. A double-click on a headline ticks a whole section.
+  %p
+    The filter finds items by name, model, inventory number or serial number.
+    Broken or missing items stay marked on their card; add details on the
+    item page afterwards.
+  %p
+    <b>Save</b> stores your ticks and stays here, <b>Return</b> stores them and
+    shows the result. Tick <i>Finished checking?</i> at the bottom when you are done.
+    Until you save, your changes are only kept on this device (local storage of
+    your browser), so you do not lose them if the connection drops. When you leave
+    the page with unsaved changes you are asked whether to save them first.
 
 .filters
   %label{for: 'item_filter'}= 'Item filter:'

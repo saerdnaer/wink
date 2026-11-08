@@ -186,4 +186,17 @@ RSpec.describe "Check lists" do
       expect(response.body).to include(%(data-remember-username="true"))
     end
   end
+
+  describe "edit page: intro text" do
+    let(:event) { Event.create!(name: "ev", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
+    let!(:check_list) { CheckList.create!(advisor: "andi") }
+
+    before { EventCase.create!(event: event, case: case_record, check_list: check_list) }
+
+    it "explains what to do" do
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body).to include("check_list_intro", "Go through the set")
+    end
+  end
 end
