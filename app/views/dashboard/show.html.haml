@@ -56,7 +56,7 @@
   %p no broken or missing items \o/
 - else
   - @grouped_items.each do |c,items|
-    %h4= c.name
+    %h4= c ? c.name : "(no case)"
     %table{border: 1}
       %thead
         %tr
