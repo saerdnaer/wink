@@ -61,7 +61,8 @@ class CaseComparison
   def group(kit)
     items = kit.not_deleted_items.not_hidden
     items = items.where(item_type_id: nil).or(items.where.not(item_type_id: ItemType.locations.select(:id)))
-    items.includes(:product).order(:name, :id).group_by { |item| key(item) }
+    # product_id is enough to match items, the products table is not needed
+    items.order(:name, :id).group_by { |item| key(item) }
   end
 
   def key(item)
