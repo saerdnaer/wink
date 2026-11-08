@@ -44,9 +44,14 @@
   %li
     %label Checklists
     %ul.events
+      -# running events of this case: create a check list or jump to the existing one
+      - @running_event_cases.each do |event_case|
+        - next if event_case.check_list
+        %li
+          %a{href: new_check_list_path(event: event_case.event_id, case: event_case.case_id)}= "create checklist for #{event_case.event.name}"
       - @case.check_lists.reverse.each do |cl|
         %li
-          %a{href: check_list_path(cl)}= "#{cl.created_at.strftime("%F")} #{cl.event.name}"
+          %a{href: check_list_path(cl)}= "#{cl.created_at.strftime("%F")} #{cl.event&.name}"
 
 %a{name: "flagged"}
 %h3 Missing or broken items

@@ -25,6 +25,10 @@ class CasesController < ApplicationController
     @grouped_items = @items_without_sections.group_by(&:location)
 
     @flagged_items = @case.flagged_items
+
+    # running events this case takes part in, with their check list (if any)
+    @running_event_cases = EventCase.where(case: @case).joins(:event).merge(Event.running)
+                                    .includes(:event, :check_list).order("events.start_date")
     @deleted_items = Item.where(case: @case, deleted: true)
 
     respond_to do |format|
