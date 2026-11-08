@@ -912,9 +912,11 @@ table.count_results {
 }
 
 // serial numbers on the cards of the check list: hidden unless "show serial numbers" is ticked
-.checklist_item .serial_number { display: none; }
+// (the selectors are as specific as the rule that lays out the id line of a card,
+// ".checklist_item label .item_ids span", and come after it)
+.checklist_item label .item_ids span.serial_number { display: none; }
 
-.show_serials .checklist_item .serial_number { display: inline-block; }
+.show_serials .checklist_item label .item_ids span.serial_number { display: inline-block; }
 
 .serial_toggle { margin: 0.3em 0 0.8em; }
 
