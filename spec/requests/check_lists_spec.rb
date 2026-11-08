@@ -478,4 +478,61 @@ RSpec.describe "Check lists" do
       expect(CheckList.new(advisor: "Alexander").advisor_names).to eq [ "Alexander" ]
     end
   end
+
+  describe "hidden items on an open check list" do
+    let(:event) { Event.create!(name: "ev", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
+    let!(:check_list) { CheckList.create!(advisor: "andi") }
+    let!(:visible_entry) { CheckListItem.create!(check_list: check_list, item: item) }
+    let!(:hidden_entry) do
+      CheckListItem.create!(check_list: check_list, item: Item.create!(name: "Versteckt", case: case_record, hidden: true))
+    end
+
+    before { EventCase.create!(event: event, case: case_record, check_list: check_list) }
+
+    it "removes them from the check list when it is opened for checking" do
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(check_list.check_list_items.reload).to eq [ visible_entry ]
+      expect(response.body).to include("1 hidden item removed from this checklist.")
+      expect(response.body).not_to include("Versteckt")
+    end
+
+    it "removes them when the result page is opened" do
+      get "/check_lists/#{check_list.id}"
+
+      expect(check_list.check_list_items.reload).to eq [ visible_entry ]
+    end
+
+    it "removes them before saving, so saving does not bring them back" do
+      patch "/check_lists/#{check_list.id}", params: { check_list: { checked: "false", checked_check_list_items: [ visible_entry.id.to_s ] } }
+
+      expect(check_list.check_list_items.reload).to eq [ visible_entry ]
+      expect(visible_entry.reload.checked).to be true
+    end
+
+    it "keeps the entries of a closed check list" do
+      check_list.update!(checked: true)
+
+      get "/check_lists/#{check_list.id}"
+
+      expect(check_list.check_list_items.reload).to include(hidden_entry)
+      expect(response.body).not_to include("hidden item removed")
+    end
+
+    it "does not mention anything when no item is hidden" do
+      hidden_entry.item.update!(hidden: false)
+
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body).not_to include("removed from this checklist")
+      expect(check_list.check_list_items.reload.size).to eq 2
+    end
+
+    it "does not count hidden items in the progress" do
+      expect(CheckList.find(check_list.id).tap { |list| list.check_list_items.load }.progress[:total]).to eq 1
+      # a closed list keeps the entry, but still does not show it in the progress
+      check_list.update!(checked: true)
+      expect(CheckList.find(check_list.id).progress[:total]).to eq 1
+    end
+  end
 end

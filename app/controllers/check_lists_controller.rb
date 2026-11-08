@@ -2,6 +2,7 @@
 
 class CheckListsController < ApplicationController
   before_action :find_check_list, except: %i[index create new]
+  before_action :remove_hidden_items, only: %i[show edit update]
 
   def index
     @check_lists = CheckList.includes(:check_list_items, event_case: %i[event case])
@@ -131,6 +132,15 @@ class CheckListsController < ApplicationController
 
   def find_check_list
     @check_list = CheckList.find(params[:id])
+  end
+
+  # Items that were hidden after the check list was created do not belong on an
+  # open check list any more.
+  def remove_hidden_items
+    removed = @check_list.remove_hidden_items!
+    return if removed.zero? || action_name == "update"
+
+    flash.now[:notice] = "#{removed} hidden #{'item'.pluralize(removed)} removed from this checklist."
   end
 
   def check_list_params

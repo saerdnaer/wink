@@ -51,10 +51,20 @@ class CheckList < ApplicationRecord
     check_list_items
   end
 
+  # Removes the entries of items that were hidden after the check list was created.
+  # A closed check list keeps its entries. Returns the number of removed entries.
+  def remove_hidden_items!
+    return 0 if checked
+
+    removed = check_list_items.joins(:item).where(items: { hidden: true }).destroy_all.size
+    check_list_items.reset if removed.positive?
+    removed
+  end
+
   # Number of checked and all items that are shown on the check list (without shelves
   # and deleted items). Preload check_list_items: { item: :item_type } for many lists.
   def progress
-    shown = check_list_items.select { |entry| entry.item && !entry.item.deleted? && !entry.item.shelf? }
+    shown = check_list_items.select { |entry| entry.item && !entry.item.deleted? && !entry.item.hidden && !entry.item.shelf? }
     { checked: shown.count(&:checked), total: shown.size }
   end
 
