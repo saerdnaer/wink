@@ -85,3 +85,4 @@ end
 
 gem "graphql", "~> 2.6"
 
+gem "rack-cors", "~> 3.0"
