@@ -14,10 +14,10 @@
     #header
       %h1
         %a{href: root_path} WINK
-
-    #menu
       -# burger button, only visible on small screens (see application.css.scss)
       %button#menu_toggle{type: "button", "aria-label": "Menu", "aria-expanded": "false", "aria-controls": "menu_list"} ☰ Menu
+
+    #menu
       %ul.menu#menu_list
         %li
           = active_link_to('dashboard', dashboard_path)

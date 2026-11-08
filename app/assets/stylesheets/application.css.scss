@@ -328,28 +328,34 @@ table {
   }
 }
 
-// burger menu: hidden on wide screens, collapses the menu on small ones
+// burger menu: hidden on wide screens, collapses the menu on small ones.
+// The button sits in the header, on the same line as the WINK logo.
+#header {
+  position: relative;
+}
+
 #menu_toggle {
   display: none;
 }
 
 @media (max-width: 700px) {
-  #menu {
-    #menu_toggle {
-      display: block;
-      box-sizing: border-box;
-      width: 100%;
-      margin: 0;
-      padding: 14px 16px;
-      border: none;
-      border-radius: 0;
-      background-color: #000;
-      color: #28c3ab;
-      font: inherit;
-      text-align: left;
-      cursor: pointer;
-    }
+  #menu_toggle {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0 16px;
+    border: none;
+    border-radius: 0;
+    background-color: #000;
+    color: #28c3ab;
+    font: inherit;
+    cursor: pointer;
+  }
 
+  #menu {
     ul.menu { display: none; }
     &.open ul.menu { display: block; }
 
