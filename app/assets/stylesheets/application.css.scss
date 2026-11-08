@@ -786,3 +786,19 @@ table.compare {
   margin-right: 1em;
   padding: 0 0.6em;
 }
+
+// running events on the dashboard
+.running_event {
+  margin-bottom: 1.5em;
+
+  h4 small { font-weight: normal; color: #555; margin-left: 0.5em; }
+}
+
+table.running_sets {
+  tr.check_state_none td { background: #fde8e8; }
+  tr.check_state_open td { background: #fff3c4; }
+  tr.check_state_running td { background: #e6f9de; }
+  tr.check_state_finished td { background: #cdeac4; }
+
+  progress { width: 8em; margin-right: 0.5em; vertical-align: middle; }
+}

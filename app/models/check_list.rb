@@ -35,6 +35,13 @@ class CheckList < ApplicationRecord
     check_list_items
   end
 
+  # Number of checked and all items that are shown on the check list (without shelves
+  # and deleted items). Preload check_list_items: { item: :item_type } for many lists.
+  def progress
+    shown = check_list_items.select { |entry| entry.item && !entry.item.deleted? && !entry.item.shelf? }
+    { checked: shown.count(&:checked), total: shown.size }
+  end
+
   # A check list is started as soon as one item was checked (or it was finished).
   def started?
     checked || check_list_items.any?(&:checked)

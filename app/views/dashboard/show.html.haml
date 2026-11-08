@@ -4,10 +4,60 @@
 
 .page_navigation
   %ul
+    - if @running_events.any?
+      %li
+        %a{href: "\#running"} running events
     %li
       %a{href: "\#events"} events
     %li
       %a{href: "\#items"} broken items
+
+- if @running_events.any?
+  %a{name: "running"}
+  %h3 Running events
+  - @running_events.each do |event|
+    - event_cases = event.event_cases.sort_by { |event_case| event_case.case.name.to_s }
+    - finished = event_cases.count { |event_case| event_case.check_list&.checked }
+    .running_event
+      %h4
+        %a{href: event_path(event)}= event.name
+        %small= "#{l event.start_date} – #{l event.end_date}, #{event.location}"
+      - if event_cases.empty?
+        %p No sets are assigned to this event yet.
+      - else
+        %p= "#{finished} of #{event_cases.size} checklists finished"
+        %table.running_sets
+          %thead
+            %tr
+              %th Set
+              %th Checklist
+              %th Status
+          %tbody
+            - event_cases.each do |event_case|
+              - check_list = event_case.check_list
+              - progress = check_list&.progress
+              - state = if check_list.nil? then "none" elsif check_list.checked then "finished" elsif check_list.started? then "running" else "open" end
+              %tr{class: "check_state_#{state}"}
+                %td.no_color
+                  %a{href: case_path(event_case.case)}= event_case.case.name
+                %td.no_color
+                  - if check_list.nil?
+                    %a{href: new_check_list_path(event: event_case.event_id, case: event_case.case_id)} create checklist
+                  - elsif check_list.checked
+                    %a{href: check_list_path(check_list)} show result
+                  - else
+                    %a{href: edit_check_list_path(check_list)}= check_list.started? ? "continue checking" : "start checking"
+                %td
+                  - case state
+                  - when "none"
+                    no checklist yet
+                  - when "open"
+                    = "not started (#{progress[:total]} items)"
+                  - when "running"
+                    %progress{value: progress[:checked], max: progress[:total]}
+                    = "#{progress[:checked]} of #{progress[:total]} checked"
+                  - else
+                    = "finished (#{progress[:checked]} of #{progress[:total]} checked)"
 
 %a{name: "events"}
 %h3 Upcoming and recent events
