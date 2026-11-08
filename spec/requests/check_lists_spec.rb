@@ -215,4 +215,24 @@ RSpec.describe "Check lists" do
       expect(response.body).to include("unsaved_notice", "data-edit-url", "data-check-list-id='#{check_list.id}'")
     end
   end
+
+  describe "menu" do
+    let(:event) { Event.create!(name: "ev", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
+    let!(:check_list) { CheckList.create!(advisor: "andi") }
+
+    before { EventCase.create!(event: event, case: case_record, check_list: check_list) }
+
+    it "has a burger button and the item search on normal pages" do
+      get "/check_lists/#{check_list.id}"
+
+      expect(response.body).to include("menu_toggle", "search items")
+    end
+
+    it "hides the item search while checking a list" do
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body).to include("menu_toggle")
+      expect(response.body).not_to include("search items")
+    end
+  end
 end

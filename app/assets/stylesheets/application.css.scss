@@ -328,6 +328,45 @@ table {
   }
 }
 
+// burger menu: hidden on wide screens, collapses the menu on small ones
+#menu_toggle {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  #menu {
+    #menu_toggle {
+      display: block;
+      box-sizing: border-box;
+      width: 100%;
+      margin: 0;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 0;
+      background-color: #000;
+      color: #28c3ab;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    ul.menu { display: none; }
+    &.open ul.menu { display: block; }
+
+    ul.menu li {
+      float: none;
+
+      a { text-align: left; }
+    }
+
+    li.search {
+      padding: 6px 16px 10px;
+
+      input { box-sizing: border-box; width: 100%; }
+    }
+  }
+}
+
 .page_navigation {
 
   float: right;

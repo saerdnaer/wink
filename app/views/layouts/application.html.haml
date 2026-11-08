@@ -16,7 +16,9 @@
         %a{href: root_path} WINK
 
     #menu
-      %ul.menu
+      -# burger button, only visible on small screens (see application.css.scss)
+      %button#menu_toggle{type: "button", "aria-label": "Menu", "aria-expanded": "false", "aria-controls": "menu_list"} ☰ Menu
+      %ul.menu#menu_list
         %li
           = active_link_to('dashboard', dashboard_path)
         %li
@@ -28,9 +30,11 @@
           = active_link_to('cases', cases_path)
         %li
           = active_link_to('items', items_path)
-        %li.search
-          = form_with url: items_path, method: :get, local: true do
-            = search_field_tag :q, params[:q], placeholder: 'search items…'
+        -# while checking a list the page has its own item filter
+        - unless controller.controller_name == 'check_lists' && action_name == 'edit'
+          %li.search
+            = form_with url: items_path, method: :get, local: true do
+              = search_field_tag :q, params[:q], placeholder: 'search items…'
 
       - if controller.controller_name == 'cases'
         %ul.submenu
