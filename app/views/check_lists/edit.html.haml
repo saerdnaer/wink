@@ -33,26 +33,32 @@
     // If all items are hidden in a shelf unit, the whole unit becomes hidden
     var item_filter_action = function() {
 
-      var pattern = new RegExp($('#item_filter').val(), 'i');
+      var filter = $('#item_filter').val();
+      var pattern;
+      try {
+        pattern = new RegExp(filter, 'i');
+      } catch (e) {
+        // not a valid regular expression: search for the literal text
+        pattern = new RegExp(filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      }
 
       $('.noborder').each(function() {
         var shown_count = 0;
 
         $(this).find('.checklist_item').each(function() {
-          // debugger;
-          if ($(this).find('label').text().match(pattern)) {
-            $(this).show();
-            shown_count += 1;
-          } else {
-            $(this).hide();
-          }
+          // search name, model, inventory number, serial number and WINK id
+          var haystack = $(this).attr('data-search') + ' ' + $(this).find('label').text();
+          var matches = !!haystack.match(pattern);
+          $(this).toggleClass('filtered_out', !matches);
+          if (matches) { shown_count += 1; }
         });
 
-        if (shown_count == 0) {
-          $(this).hide();
-        } else {
-          $(this).show();
-        }
+        // a stack is shown as long as one of its items matches
+        $(this).find('.checklist_stack').each(function() {
+          $(this).toggleClass('filtered_out', $(this).find('.checklist_item:not(.filtered_out)').length == 0);
+        });
+
+        $(this).toggleClass('filtered_out', shown_count == 0);
       });
 
       item_filter_value = $('#item_filter').val();
@@ -96,17 +102,84 @@
   });
 
 
-  // Select all items in headline group, when clicking on the headline.
   $(document).ready(function() {
-    $('h3').click(function() {
-      inputs = $(this).parent().find('input[type="checkbox"]');
-      
-      if (inputs[0].checked) {
-        var checked = false;
-      } else {
-        var checked = true;
-      }
+    // Show "(checked/total)" in the headline of a section
+    var update_progress = function(section) {
+      var checked = section.find('.checklist_item input[type="checkbox"]:checked').length;
+      var total = section.find('.progress').data('total');
+      section.find('.progress').text('(' + checked + '/' + total + ')');
+    };
 
-      $(inputs).prop('checked', checked);
+    // Stacks of identical items: "checked/total" and colour
+    var update_stack = function(stack) {
+      var boxes = stack.find('input[type="checkbox"]');
+      var checked = boxes.filter(':checked').length;
+      stack.find('.stack_progress').text(checked + '/' + boxes.length);
+      stack.toggleClass('all_checked', checked == boxes.length);
+      stack.toggleClass('partial', checked > 0 && checked < boxes.length);
+    };
+
+    $('.noborder .checklist_item input[type="checkbox"]').change(function() {
+      update_progress($(this).closest('.noborder'));
+      var stack = $(this).closest('.checklist_stack');
+      if (stack.length) { update_stack(stack); }
+    });
+    $('.checklist_stack').each(function() { update_stack($(this)); });
+
+    // Click on a stack checks its next unchecked item; when everything is
+    // checked, a click unchecks the whole stack again.
+    $('.stack_summary').on('click keydown', function(event) {
+      if (event.type == 'keydown' && event.key != 'Enter' && event.key != ' ') { return; }
+      event.preventDefault();
+      var stack = $(this).closest('.checklist_stack');
+      var inputs = stack.find('.checklist_item:not(.filtered_out) input[type="checkbox"]');
+      var open = inputs.filter(':not(:checked)');
+
+      if (open.length) {
+        open.first().prop('checked', true).trigger('change');
+      } else {
+        inputs.prop('checked', false).trigger('change');
+      }
+    });
+
+    $('.stack_toggle').click(function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      var stack = $(this).closest('.checklist_stack');
+      stack.toggleClass('expanded');
+      $(this).text(stack.hasClass('expanded') ? 'hide items' : 'show items');
+    });
+
+    // Deep link (#VOC00618 or #2344): open the stack the item is in and highlight it
+    var open_deep_link = function() {
+      var target = document.getElementById(decodeURIComponent(window.location.hash.substring(1)));
+      if (!target) { return; }
+      var stack = $(target).closest('.checklist_stack');
+      if (stack.length) {
+        stack.addClass('expanded');
+        stack.find('.stack_toggle').text('hide items');
+      }
+      $('.checklist_item.highlight').removeClass('highlight');
+      $(target).closest('.checklist_item').addClass('highlight');
+      target.scrollIntoView({ block: 'center' });
+    };
+    open_deep_link();
+    $(window).on('hashchange', open_deep_link);
+
+    // Double-click on a headline checks the whole section (only the items
+    // currently matching the filter). If all of them are already checked,
+    // they get unchecked again.
+    $('h3.section_heading').dblclick(function() {
+      var section = $(this).closest('.noborder');
+      var inputs = section.find('.checklist_item:not(.filtered_out) input[type="checkbox"]');
+      var all_checked = inputs.filter(':not(:checked)').length == 0;
+
+      inputs.prop('checked', !all_checked);
+      update_progress(section);
+      // the stacks (colour and "n/m checked") have to follow as well
+      section.find('.checklist_stack').each(function() { update_stack($(this)); });
+
+      // drop the text selection a double-click causes
+      if (window.getSelection) { window.getSelection().removeAllRanges(); }
     });
   });

@@ -1,29 +1,51 @@
-- p @grouped_items
 - @grouped_items.sort_by{|location,items| "#{location}" }.each do |location,items|
   %p.export_cases
     .noborder
       - if location.empty?
         %a{name: Digest::MD5.hexdigest("nolocation")}
-        %h3{id: Digest::MD5.hexdigest("nolocation")}= "no location"
+        %h3.section_heading{id: Digest::MD5.hexdigest("nolocation"), title: "Double-click: check / uncheck the whole section"}
+          no location
+          %span.progress{data: { total: items.count }}= "(#{items.count(&:checked)}/#{items.count})"
       - else
         %p.export_cases
           %a{name: "#{Digest::MD5.hexdigest(location)}"}
-          %h3{id: Digest::MD5.hexdigest(location)}= "#{location} (#{items.count})"
+          %h3.section_heading{id: Digest::MD5.hexdigest(location), title: "Double-click: check / uncheck the whole section"}
+            = location
+            %span.progress{data: { total: items.count }}= "(#{items.count(&:checked)}/#{items.count})"
 
       %div.checklist_group
         -# TODO: Be able to mark broken items with comments.
-        - items.sort_by{|cli| "#{cli.item.item&.name}#{cli.item.name}.#{format('%05.1f', cli.item.model.to_f)}" }.each do |cli|
-          -# indent checkbox when it is related to another item e.g. power bricks
-          -# if cli.item.item
-            %td
-          %div.checklist_item
-            = check_box_tag("checked_check_list_items_#{cli.id}", cli.id, cli.checked, { name: "check_list[checked_check_list_items][]"})
-            %label{ for: "checked_check_list_items_#{cli.id}" }
-              #{cli.item.name_with_model}
-              - if cli.item.missing? or cli.item.broken?
-                %br
-                %span.mark.missing= "missing" if cli.item.missing?
-                %span.mark.broken= "broken" if cli.item.broken?
+        - sorted = items.sort_by{|cli| "#{cli.item.item&.name}#{cli.item.name}.#{format('%05.1f', cli.item.model.to_f)}" }
+        -# items with the same title (and parent) are stacked on each other, even if only
+        -# some of them have a model, but only when they have neither an inventory number
+        -# nor a serial number
+        - sorted.group_by{ |cli| cli.item.inventory_number.blank? && cli.item.serial_number.to_s.strip.in?(["", "n.a."]) ? [cli.item.name.to_s.strip.downcase, cli.item.item_id] : cli.id }.each_value do |stack|
+          - if stack.size == 1
+            = render partial: 'checklist_card', locals: { cli: stack.first }
+          - else
+            - first = stack.first.item
+            -# manufacturer/model of all items, each variant only once
+            - details = stack.map { |cli| [cli.item.manufacturer, cli.item.model].reject { |v| v.blank? || v == "-" }.join(" ") }.reject(&:blank?).uniq.join(" · ")
+            - types = stack.map { |cli| cli.item.item_type&.name }.uniq
+            %div.checklist_stack{data: { total: stack.size }}
+              %div.stack_summary{role: "button", tabindex: 0, title: "Click: check next item of the stack"}
+                - if types.size == 1 && types.first
+                  %span.item_type= types.first
+                %span.item_name
+                  %span.stack_count= "#{stack.size}×"
+                  = first.name
+                - if details.present?
+                  %span.item_details= details
+                - if first.item
+                  %span.item_parent= "↳ part of #{first.item.name}"
+                %span.stack_status
+                  %span.stack_state
+                    %span.stack_progress= "#{stack.count(&:checked)}/#{stack.size}"
+                    checked
+                  %a.stack_toggle{href: "#", title: "Show the single items"} show items
+              %div.stack_items
+                - stack.each do |cli|
+                  = render partial: 'checklist_card', locals: { cli: cli }
 
 .noborder
   %table

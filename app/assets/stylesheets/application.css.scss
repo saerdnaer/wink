@@ -79,6 +79,18 @@ aside.check_lists {
   }
 }
 
+// check list: inventory number next to the item name, deep link target
+.checklist_item .inventory_number {
+  margin-left: 0.5em;
+  font-size: 0.8em;
+  color: #666;
+}
+
+.checklist_item:target,
+.check_list_entry:target {
+  background-color: #ffe98a;
+}
+
 // forms
 input[type=text], textarea {
    width: 250px;
@@ -352,10 +364,167 @@ input[type=submit]:hover, input[type=submit]:focus {
     label {
         display:block;
         min-height: 2em;
-        padding:5px;
+        padding:6px 10px;
         border:1px solid black;
         border-radius: 10px;
-        text-align:center;
+        text-align:left;
+        line-height: 1.3;
+        cursor: pointer;
+
+        // every part of an item on its own line
+        span {
+            display: block;
+        }
+
+        // tag in the top right corner, the name wraps around it
+        .item_type {
+            display: inline-block;
+            float: right;
+            margin: 0 0 4px 8px;
+            padding: 0 6px;
+            border-radius: 8px;
+            background: #e4e4e4;
+            font-size: 0.7em;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .item_name {
+            font-weight: bold;
+        }
+
+        .item_details,
+        .item_parent,
+        .item_ids {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .item_ids span {
+            display: inline-block;
+            margin-right: 0.8em;
+        }
+
+        // no extra margin here, the id line is the same as in the item list
+        .inventory_number {
+            margin-left: 0;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        .item_flags {
+            margin-top: 3px;
+        }
     }
 
+    // checked items: keep the secondary lines readable on the green background
+    input:checked + label {
+        .item_details, .item_parent, .item_ids { color: #1b5e00; }
+        .item_type { background: #b4f09f; }
+    }
 }
+
+// section headline of a check list: double-click checks the whole section
+h3.section_heading {
+    cursor: pointer;
+    user-select: none;
+
+    .progress {
+        font-size: 0.7em;
+        font-weight: normal;
+        color: #666;
+    }
+
+    &:hover {
+        text-decoration: underline dotted;
+    }
+}
+
+// check list: identical items without inventory/serial number are stacked
+.filtered_out {
+    display: none !important;
+}
+
+.checklist_stack {
+    display: inline-block;
+    vertical-align: middle;
+    width: 300px;
+    max-width: 90%;
+    margin: 10px;
+
+    // collapsed: only the summary card (drawn as a pile of cards)
+    .stack_summary {
+        box-sizing: border-box;
+        padding: 6px 10px;
+        border: 1px solid black;
+        border-radius: 10px;
+        background: white;
+        line-height: 1.3;
+        cursor: pointer;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        box-shadow: 5px 5px 0 -1px white, 5px 5px 0 0 black,
+                    10px 10px 0 -1px white, 10px 10px 0 0 black;
+
+        span { display: block; }
+
+        .item_type {
+            display: inline-block;
+            float: right;
+            margin: 0 0 4px 8px;
+            padding: 0 6px;
+            border-radius: 8px;
+            background: #e4e4e4;
+            font-size: 0.7em;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .item_name { font-weight: bold; }
+
+        .stack_count {
+            display: inline-block;
+            margin-right: 0.3em;
+            padding: 0 6px;
+            border-radius: 8px;
+            background: black;
+            color: white;
+        }
+
+        .item_details, .item_parent, .stack_status {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        // "1/3 checked" on the left, "show items" in the lower right corner
+        .stack_status {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+
+            .stack_state, .stack_progress { display: inline; }
+        }
+    }
+
+    &.partial .stack_summary { background: #e6f9de; }
+    &.all_checked .stack_summary { background: #33dd00; }
+    &.all_checked .stack_summary .item_details,
+    &.all_checked .stack_summary .item_parent,
+    &.all_checked .stack_summary .stack_status { color: #1b5e00; }
+
+    .stack_items { display: none; }
+
+    // expanded: show every single item below the summary
+    &.expanded {
+        width: auto;
+        max-width: 100%;
+
+        .stack_summary { width: 300px; max-width: 90%; }
+        .stack_items { display: block; }
+    }
+}
+
+.checklist_item.highlight label {
+    outline: 3px solid #ffb300;
+}
+

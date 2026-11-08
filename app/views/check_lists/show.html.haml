@@ -40,13 +40,20 @@
     %h3= "Missing (#{items[false].count})"
     - items[false].group_by{|ci| ci.item.name}.each do |name,citems|
       - citems.each do |ci|
-        %li= "#{ci.item.name_with_model}"
+        %li.check_list_entry{id: ci.item.inventory_number.presence || ci.item.id.to_s}
+          - if ci.item.inventory_number.present?
+            %a{id: ci.item.id.to_s}
+          = "#{ci.item.name_with_model}"
 
   - if items[true]
     %h3= "Checked (#{items[true].count})"
     %ul
     - items[true].group_by{|ci| ci.item.name}.each do |name,citems|
       %li
+        - citems.each do |ci|
+          %a{id: ci.item.id.to_s}
+          - if ci.item.inventory_number.present?
+            %a{id: ci.item.inventory_number}
         - if ( citems.count == 1 || citems.group_by{|ci| ci.item.model}.count == 1 )
           = "#{name} " + ("✔" * citems.count)
         - else
