@@ -4,7 +4,11 @@ class CheckListsController < ApplicationController
   before_action :find_check_list, except: %i[index create new]
 
   def index
-    @check_lists = CheckList.all
+    @check_lists = CheckList.includes(:check_list_items, event_case: %i[event case])
+                            .sort_by do |check_list|
+      date = check_list.event&.start_date
+      [ date ? -date.to_time.to_i : 0, -check_list.id ]
+    end
 
     respond_to do |format|
       format.html

@@ -260,6 +260,39 @@ RSpec.describe "Check lists" do
     end
   end
 
+  describe "index" do
+    let(:event) { Event.create!(name: "Congress", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
+
+    it "lists the check lists with event, set, advisor and status" do
+      open_list = CheckList.create!(advisor: "Bert")
+      EventCase.create!(event: event, case: case_record, check_list: open_list)
+      other_case = Case.create!(name: "Video", acronym: "VID", case_type: case_type)
+      done = CheckList.create!(advisor: "Ernie", checked: true)
+      EventCase.create!(event: event, case: other_case, check_list: done)
+
+      get "/check_lists"
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Congress", "Audio", "Video", "Bert", "Ernie", "not started", "finished")
+    end
+
+    it "copes with no check lists" do
+      CheckList.destroy_all
+
+      get "/check_lists"
+
+      expect(response.body).to include("No checklists yet")
+    end
+
+    it "copes with check lists without an event" do
+      CheckList.create!(advisor: "Orphan")
+
+      get "/check_lists"
+
+      expect(response.body).to include("Orphan")
+    end
+  end
+
   describe "edit page: pencil on sections" do
     let(:event) { Event.create!(name: "ev", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
     let!(:check_list) { CheckList.create!(advisor: "andi") }

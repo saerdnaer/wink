@@ -850,3 +850,7 @@ h3.section_heading .section_edit {
   font-size: 0.8em;
   text-decoration: none;
 }
+
+table tr.check_state_finished td { background: #cdeac4; }
+table tr.check_state_in_progress td { background: #e6f9de; }
+

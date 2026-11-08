@@ -1,51 +1,41 @@
-- content_for :title, "Events - "
+- content_for :title, "Checklists - "
 
+%h2 Checklists
 
-%h2 Events
+- if @check_lists.empty?
+  %p No checklists yet. Create one from an event or a set page.
+- else
+  - by_year = @check_lists.group_by { |check_list| (check_list.event&.start_date || check_list.created_at).year }
+  .page_navigation
+    %ul
+      - by_year.each_key do |year|
+        %li
+          %a{href: "\##{year}"}= year
 
-%a{href: new_event_path} create new event
-%a{href: events_import_path} import events
-
-.page_navigation
-  %ul
-    - @events.group_by{|e| e.start_date.year}.each do |year,events|
-      %li
-        %a{href: "\##{year}"}= year
-
-- @events.group_by{|e| e.start_date.year}.each do |year,events|
-  %a{name: year}
-  %h3= "#{year} (#{events.count})"
-  %table
-    %thead
-      %tr
-        %th.name Name
-        %th.location Location
-        %th.start_date Start date
-        %th.end_date End date
-        %th.buildup Buildup
-        %th.removel Removel
-        %th.cases Sets
-        %th.actions Actions
-    %tbody
-      - events.each do |event|
+  - by_year.each do |year, check_lists|
+    %a{name: year}
+    %h3= "#{year} (#{check_lists.size})"
+    %table
+      %thead
         %tr
-          %td.no_color
-            %a{href: event_path(event)}= event.name
-          %td.no_color
-            %a{href: event_path(event)}= event.location
-          %td.no_color
-            %a{href: event_path(event)}= event.start_date
-          %td.no_color
-            %a{href: event_path(event)}= event.end_date
-          %td.no_color
-            %a{href: event_path(event)}= event.buildup
-          %td.no_color
-            %a{href: event_path(event)}= event.removel
-          %td.no_color
-            - if event.cases.count == 0
-              no sets assigned
-            - else
-              %a{href: event_path(event)}= event.cases.map{|c| c.acronym }.join(", ")
-          %td
-            %a{href: event_path(event)} show
-            %a{href: edit_event_path(event)} edit
+          %th.event Event
+          %th.case Set
+          %th.advisor Advisor
+          %th.status Status
+          %th.actions Actions
+      %tbody
+        - check_lists.each do |check_list|
+          - state = if check_list.checked then "finished" elsif check_list.started? then "in progress" else "not started" end
+          %tr{class: "check_state_#{state.tr(' ', '_')}"}
+            %td.no_color
+              - if check_list.event
+                %a{href: event_path(check_list.event)}= check_list.event.name
+            %td.no_color
+              - if check_list.case
+                %a{href: case_path(check_list.case)}= check_list.case.name
+            %td.no_color= check_list.advisor
+            %td= state
+            %td
+              %a{href: check_list_path(check_list)} show
+              - unless check_list.checked
+                %a{href: edit_check_list_path(check_list)} check
