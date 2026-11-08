@@ -42,4 +42,4 @@
       %label.inline
         = check_box_tag "remove_image", "1", false
         remove logo
-  = f.file_field :logo, accept: "image/png,image/jpeg,image/gif,image/webp"
+  = f.file_field :logo, accept: "image/png,image/jpeg,image/gif,image/webp", data: { image_drop: true }

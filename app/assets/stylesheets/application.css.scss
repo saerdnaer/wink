@@ -682,6 +682,31 @@ img.image_thumb {
   vertical-align: middle;
 }
 
+// drop zone for images (image_drop.js): drag & drop, paste, click
+.image_drop {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  box-sizing: border-box;
+  max-width: 30em;
+  min-height: 5em;
+  padding: 0.8em 1em;
+  border: 2px dashed #28c3ab;
+  border-radius: 10px;
+  background: #f4fbf9;
+  cursor: pointer;
+
+  &:hover, &:focus { background: #eaf8f5; outline: none; }
+  &:focus { border-style: solid; }
+  &.dragging { background: #bfeee6; border-style: solid; }
+  &.has_file { border-style: solid; }
+
+  .image_drop_preview { max-width: 8em; max-height: 6em; border-radius: 4px; }
+  .image_drop_text { flex: 1; }
+  .image_drop_file { display: block; font-size: 0.85em; color: #555; }
+  .image_drop_error { display: block; color: #c00; }
+}
+
 .image_current {
   display: block;
   margin: 0.3em 0;

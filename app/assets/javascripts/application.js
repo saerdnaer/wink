@@ -17,6 +17,7 @@
 //= require cable
 //= require menu
 //= require from_url
+//= require image_drop
 //= require remember_username
 //= require check_list_offline
 
