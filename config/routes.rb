@@ -30,5 +30,13 @@ Rails.application.routes.draw do
 
   post "/graphql", to: "graphql#execute"
 
+  namespace :api do
+    namespace :v1 do
+      resources :items, only: %i[index show]
+      resources :products, only: %i[index show]
+      resources :check_lists, only: %i[index show]
+    end
+  end
+
   root to: "root#show"
 end

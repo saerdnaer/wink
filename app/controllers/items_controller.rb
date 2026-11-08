@@ -3,6 +3,8 @@
 require "csv"
 
 class ItemsController < ApplicationController
+  include JsonLdRendering
+
   before_action :find_item, except: %i[index create new export]
 
   def index
@@ -25,6 +27,13 @@ class ItemsController < ApplicationController
         @items = Item.where(deleted: false).search(@query)
 
         render json: @items
+      end
+
+      format.jsonld do
+        items = Item.where(deleted: false).search(@query)
+                    .includes(:case, :item_type, :product, :item, :location).order(:id)
+
+        render_list(items, "Items") { |item| ItemSerializer.call(item, urls: self) }
       end
 
       format.csv do
@@ -66,6 +75,7 @@ class ItemsController < ApplicationController
     respond_to do |format|
       format.html
       format.json { render json: @item.to_json }
+      format.jsonld { render_jsonld ItemSerializer.call(@item, urls: self, detail: true) }
     end
   end
 
