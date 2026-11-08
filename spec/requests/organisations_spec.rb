@@ -234,4 +234,84 @@ RSpec.describe "Organisations" do
       expect(flash[:alert]).to include("not a public address")
     end
   end
+
+  describe "parent organisation" do
+    let!(:group) { Organisation.create!(name: "Group AG") }
+    let!(:branch) { Organisation.create!(name: "Branch GmbH", parent: group) }
+
+    it "offers possible parents in the form, but not the organisation itself or its descendants" do
+      Organisation.create!(name: "Other Org")
+      sub = Organisation.create!(name: "Sub of Branch", parent: branch)
+      expect(sub.parent).to eq branch
+
+      get "/organisations/#{group.id}/edit"
+
+      expect(response.body).to include("organisation[parent_id]", "Other Org")
+      expect(response.body).not_to include("Branch GmbH", "Sub of Branch")
+    end
+
+    it "sets the parent through the form" do
+      other = Organisation.create!(name: "Other Org")
+
+      patch "/organisations/#{other.id}", params: { organisation: { name: "Other Org", parent_id: group.id } }
+
+      expect(other.reload.parent).to eq group
+    end
+
+    it "rejects cycles" do
+      patch "/organisations/#{group.id}", params: { organisation: { name: "Group AG", parent_id: branch.id } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include("cannot be the organisation itself")
+      expect(group.reload.parent).to be_nil
+    end
+
+    it "rejects an organisation as its own parent" do
+      patch "/organisations/#{group.id}", params: { organisation: { name: "Group AG", parent_id: group.id } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+    end
+
+    it "shows parent and sub-organisations" do
+      get "/organisations/#{branch.id}"
+      expect(response.body).to include("Part of", "Group AG")
+
+      get "/organisations/#{group.id}"
+      expect(response.body).to include("Sub-organisations", "Branch GmbH")
+    end
+
+    it "lists the parent in the table" do
+      get "/organisations"
+
+      expect(response.body).to include("Part of", "href='/organisations/#{group.id}'")
+    end
+
+    it "moves sub-organisations up when their parent is deleted" do
+      top = Organisation.create!(name: "Top")
+      group.update!(parent: top)
+
+      delete "/organisations/#{group.id}"
+
+      expect(branch.reload.parent).to eq top
+      expect(group.reload.deleted).to be true
+    end
+
+    it "is part of the JSON-LD" do
+      get "/api/v1/organisations/#{branch.id}"
+      expect(json["parentOrganization"]).to include("name" => "Group AG")
+
+      get "/api/v1/organisations/#{group.id}"
+      expect(json["subOrganization"].pluck("name")).to eq [ "Branch GmbH" ]
+    end
+
+    it "uses a known parentOrganization of a schema.org page" do
+      page = { "@type" => "Organization", "name" => "Branch Two", "parentOrganization" => { "@type" => "Organization", "name" => "group ag" } }
+      html = %(<html><head><script type="application/ld+json">#{page.to_json}</script></head></html>)
+      allow(SafeFetch).to receive(:get).and_return(SafeFetch::Response.new(html, "text/html", "https://two.example/"))
+
+      post "/organisations/from_url", params: { url: "https://two.example/" }
+
+      expect(Organisation.find_by!(name: "Branch Two").parent).to eq group
+    end
+  end
 end

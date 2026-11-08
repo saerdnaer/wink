@@ -5,7 +5,7 @@
 class OrganisationImporter
   class Error < StandardError; end
 
-  Result = Struct.new(:attributes, :logo_url, :source_url, keyword_init: true)
+  Result = Struct.new(:attributes, :logo_url, :source_url, :parent_name, keyword_init: true)
 
   TYPE_PATTERN = /(Organization|Corporation|Business|Store|NGO|Company)\z/
   DETAIL_KEYS = %w[legalName description email telephone address logo url sameAs].freeze
@@ -25,7 +25,8 @@ class OrganisationImporter
     raise Error, "no schema.org organisation data found on this page" if name.blank?
 
     Result.new(attributes: attributes(node, name, source_url),
-               logo_url: SchemaOrg.image_url(node["logo"] || node["image"], source_url), source_url: source_url)
+               logo_url: SchemaOrg.image_url(node["logo"] || node["image"], source_url), source_url: source_url,
+               parent_name: SchemaOrg.text(node["parentOrganization"]).presence)
   end
 
   def self.organisation_node(doc)

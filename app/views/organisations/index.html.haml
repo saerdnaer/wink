@@ -21,6 +21,7 @@
     %tr
       %th.image Logo
       %th.name Name
+      %th.parent Part of
       %th.roles Roles
       %th.url Web site
       %th.actions Actions
@@ -32,6 +33,9 @@
             = image_tag image_organisation_path(organisation), alt: organisation.name, class: "image_thumb"
         %td.no_color
           %a{href: organisation_path(organisation)}= organisation.name
+        %td.no_color
+          - if organisation.parent && !organisation.parent.deleted?
+            %a{href: organisation_path(organisation.parent)}= organisation.parent.name
         %td.no_color
           - organisation.roles.each do |role|
             %a.role_badge{href: organisations_path(role: role)}= role

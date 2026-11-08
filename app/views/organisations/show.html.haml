@@ -13,6 +13,11 @@
     %li
       %label= label
       %span= value
+  - if @organisation.parent
+    %li
+      %label Part of
+      %span
+        %a{href: organisation_path(@organisation.parent)}= @organisation.parent.name
   %li
     %label Roles
     %span
@@ -25,6 +30,12 @@
       %label Web site
       %span
         %a{href: @organisation.url}= @organisation.url
+  - if @organisation.children.existing.any?
+    %li
+      %label Sub-organisations
+      %span
+        - @organisation.children.existing.order(:name).each do |child|
+          %a{href: organisation_path(child)}= child.name
   %br
   %li
     %label Actions

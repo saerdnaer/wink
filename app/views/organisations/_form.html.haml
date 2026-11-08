@@ -7,6 +7,10 @@
   %label.hint AUER Packaging GmbH
   = f.text_field :legal_name
 %p
+  %label{for: 'organisation_parent_id'}= "Parent organisation:"
+  %label.hint Department or subsidiary of another organisation
+  = f.collection_select :parent_id, f.object.possible_parents, :id, :name, include_blank: "(none)"
+%p
   %label= "Roles:"
   %label.hint What the organisation is for us. An organisation can have several roles.
   = hidden_field_tag "organisation[roles][]", "", id: nil
