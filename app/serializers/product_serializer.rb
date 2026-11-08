@@ -13,7 +13,7 @@ class ProductSerializer
       "mpn" => product.product_number,
       "gtin" => product.gtin&.to_s,
       "identifier" => identifiers(product),
-      "image" => product.image,
+      "image" => (urls.image_product_url(product) if product.image.present?),
       "url" => product.product_link.presence || product.url.presence,
       "sameAs" => ([ product.wiki_url ] + Array(product.alternate_urls)).compact_blank,
       "wink:id" => product.id,

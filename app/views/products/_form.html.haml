@@ -1,11 +1,45 @@
 %p
-  %label{for: 'name'}= "Name:"
-  %label.hint Audio case 1337
+  %label{for: 'product_name'}= "Name:"
+  %label.hint Audio cable XLR 3m
   = f.text_field :name
 %p
-  %label{for: 'acronym'}= "Acronym:"
-  %label.hint A1337
-  = f.text_field :acronym
+  %label{for: 'product_description'}= "Description:"
+  %label.hint Short description, e.g. "Camera"
+  = f.text_field :description
 %p
-  %label{for: 'case_type_id'}= "Case type:"
-  = f.collection_select :case_type_id, CaseType.order(:name), :id, :name, include_blank: false
+  %label{for: 'product_manufacturer'}= "Manufacturer:"
+  = f.text_field :manufacturer
+%p
+  %label{for: 'product_model'}= "Model:"
+  = f.text_field :model
+%p
+  %label{for: 'product_product_number'}= "Product number:"
+  = f.text_field :product_number
+%p
+  %label{for: 'product_gtin'}= "GTIN (EAN/UPC):"
+  = f.text_field :gtin, inputmode: "numeric"
+%p
+  %label{for: 'product_asin'}= "ASIN:"
+  = f.text_field :asin
+%p
+  %label{for: 'product_price'}= "Purchase price:"
+  = f.number_field :price, step: "0.01", min: 0
+%p
+  %label{for: 'product_insurance_value'}= "Replacement value:"
+  = f.number_field :insurance_value, step: "0.01", min: 0
+%p
+  %label{for: 'product_product_link'}= "Product link:"
+  = f.text_field :product_link
+%p
+  %label{for: 'product_wiki_url'}= "Wiki page:"
+  = f.text_field :wiki_url
+%p
+  %label{for: 'product_image'}= "Image:"
+  %label.hint PNG, JPEG, GIF or WebP, up to 5 MB
+  - if f.object.image.present?
+    %span.product_image_current
+      = image_tag image_product_path(f.object), alt: f.object.name, class: "product_image_thumb"
+      %label.inline
+        = check_box_tag "remove_image", "1", false
+        remove image
+  = f.file_field :image, accept: "image/png,image/jpeg,image/gif,image/webp"

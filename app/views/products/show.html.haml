@@ -1,3 +1,40 @@
 - content_for :title, "#{@product.name} - "
 
 %h2= @product.name
+
+- if @product.image.present?
+  = image_tag image_product_path(@product), alt: @product.name, class: "product_image"
+
+%ol.properties
+  - { "Description" => @product.description, "Manufacturer" => @product.manufacturer,
+      "Model" => @product.model, "Product number" => @product.product_number,
+      "GTIN" => @product.gtin, "ASIN" => @product.asin,
+      "Purchase price" => (number_to_currency(@product.price) if @product.price),
+      "Replacement value" => (number_to_currency(@product.insurance_value) if @product.insurance_value) }.each do |label, value|
+    - next if value.blank?
+    %li
+      %label= label
+      %span= value
+  - if @product.product_link.present?
+    %li
+      %label Product link
+      %span
+        %a{href: @product.product_link}= @product.product_link
+  - if @product.wiki_url.present?
+    %li
+      %label Wiki
+      %span
+        %a{href: @product.wiki_url}= @product.wiki_url
+  %br
+  %li
+    %label Actions
+    %span.actions
+      %a{href: edit_product_path(@product)} edit
+      = link_to 'delete', product_path(@product), data: { confirm: "Delete product '#{@product.name}'?" }, method: :delete
+
+%h3= "Items (#{@product.items.existing.count})"
+%ul
+  - @product.items.existing.includes(:case).order(:name).each do |item|
+    %li
+      %a{href: item_path(item)}= item.name
+      = "(#{item.case&.name})" if item.case

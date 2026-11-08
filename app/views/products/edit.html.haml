@@ -1,15 +1,10 @@
-- content_for :title, "Edit #{@case.acronym} - "
+- content_for :title, "Edit #{@product.name} - "
 
-%h2= "Edit '#{@case.name}' (#{@case.acronym})"
+%h2= "Edit '#{@product.name}'"
+= render partial: 'record_errors', locals: { record: @product }
 
-- if @case.errors.any?
-  %ul
-    - @case.errors.each do |message|
-      %li
-        = message
-
-= form_for(@case, as: :case, url: case_path(@case), method: 'PUT') do |f|
-  = render partial: 'form', locals: {f: f}, object: @case
+= form_for(@product, as: :product) do |f|
+  = render partial: 'form', locals: { f: f }
 
   = f.submit "Save"
-  = link_to 'Cancel', cases_path
+  = link_to 'Cancel', product_path(@product)

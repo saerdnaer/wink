@@ -630,3 +630,24 @@ h3.section_heading {
     outline: 3px solid #ffb300;
 }
 
+
+// product images
+img.product_image {
+  float: right;
+  max-width: 40%;
+  max-height: 20em;
+  margin: 0 0 1em 1em;
+}
+
+img.product_image_thumb {
+  max-width: 6em;
+  max-height: 4em;
+  vertical-align: middle;
+}
+
+.product_image_current {
+  display: block;
+  margin: 0.3em 0;
+
+  label.inline { display: inline; margin-left: 1em; }
+}

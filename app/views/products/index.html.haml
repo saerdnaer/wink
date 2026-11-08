@@ -6,16 +6,21 @@
 %table{border: 1}
   %thead
     %tr
-      %th.name Description
-      %th.number Acronym
+      %th.image Image
+      %th.name Name
+      %th.manufacturer Manufacturer
+      %th.model Model
       %th.actions Actions
   %tbody
     - @products.each do |product|
       %tr
+        %td
+          - if product.image.present?
+            = image_tag image_product_path(product), alt: product.name, class: "product_image_thumb"
         %td.no_color
           %a{href: product_path(product)}= product.name
-        %td.no_color
-          %a{href: product_path(product)}= product.description
+        %td.no_color= product.manufacturer
+        %td.no_color= product.model
         %td
           %a{href: product_path(product)} show
           %a{href: edit_product_path(product)} edit
