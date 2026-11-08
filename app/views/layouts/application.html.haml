@@ -30,6 +30,8 @@
           = active_link_to('cases', cases_path)
         %li
           = active_link_to('items', items_path)
+        %li
+          = active_link_to('products', products_path)
         -# while checking a list the page has its own item filter
         - unless controller.controller_name == 'check_lists' && action_name == 'edit'
           %li.search

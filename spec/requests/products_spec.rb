@@ -24,6 +24,14 @@ RSpec.describe "Products" do
     Dir.children(image_dir)
   end
 
+  describe "the menu" do
+    it "links to the products" do
+      get "/items"
+
+      expect(response.body).to include(%(href="/products"))
+    end
+  end
+
   describe "the form" do
     it "is multipart and has an image upload" do
       get "/products/new"
