@@ -6,6 +6,7 @@ Rails.application.routes.draw do
 
   resources :cases do
     collection do
+      get :compartments
       get :compare
     end
   end

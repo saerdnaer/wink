@@ -1,0 +1,54 @@
+- content_for :title, "Items per compartment - "
+
+%h2 Items per compartment
+
+%p
+  %a{href: cases_path} ← all sets
+  %br
+  %span.hint
+    Boxes and bags in a compartment are counted separately. "In boxes" are the items inside
+    those boxes; "total" is "directly" plus "in boxes".
+
+- @entries.each do |type, entries|
+  - entries.each do |entry|
+    %h3
+      %a{href: case_path(entry.case_record)}= entry.case_record.name
+      - if type.present?
+        %span.hint= type
+    - if entry.rows.empty? && entry.unplaced.zero?
+      %p.hint No items.
+    - else
+      %table.compartment_counts{border: 1}
+        %thead
+          %tr
+            %th.name Compartment
+            %th.number Boxes
+            %th.number Directly
+            %th.number In boxes
+            %th.number Total
+        %tbody
+          - entry.rows.each do |row|
+            %tr
+              %td.no_color
+                %a{href: item_path(row.compartment)}= row.compartment.name
+              %td.number= row.boxes
+              %td.number= row.direct
+              %td.number= row.in_boxes
+              %td.number
+                %b= row.total
+          - if entry.unplaced.positive?
+            %tr
+              %td.no_color
+                %i not in a compartment
+              %td.number
+              %td.number= entry.unplaced
+              %td.number
+              %td.number
+                %b= entry.unplaced
+        %tfoot
+          %tr
+            %th Total
+            %th.number= entry.rows.sum(&:boxes)
+            %th.number= entry.rows.sum(&:direct) + entry.unplaced
+            %th.number= entry.rows.sum(&:in_boxes)
+            %th.number= entry.total

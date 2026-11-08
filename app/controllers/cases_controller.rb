@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class CasesController < ApplicationController
-  before_action :find_case, except: %i[index create new compare]
+  before_action :find_case, except: %i[index create new compartments compare]
 
   def index
     @cases = {}
@@ -16,6 +16,11 @@ class CasesController < ApplicationController
       format.html
       format.json { render json: Case.all.to_json }
     end
+  end
+
+  # GET /cases/compartments: number of items per compartment of every set
+  def compartments
+    @entries = CompartmentOverview.call.group_by { |entry| entry.case_record.case_type&.name.to_s }
   end
 
   # GET /cases/compare?a=1&b=2: item by item comparison of two sets
