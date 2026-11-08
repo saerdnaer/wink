@@ -6,6 +6,12 @@
   at
   %a{href: event_path(@check_list.event), target: '_blank'}= @check_list.event.name
 
+%p.check_list_advisor
+  Checked by
+  %strong= @check_list.advisor
+  - if @check_list.comment.present?
+    %span.hint= "– #{@check_list.comment}"
+
 %div.check_list_intro
   %p
     Go through the set and tick every item that is there and works.

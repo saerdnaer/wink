@@ -245,6 +245,14 @@ RSpec.describe "Check lists" do
       CheckListItem.create!(check_list: check_list, item: item)
     end
 
+    it "shows who is doing the check" do
+      check_list.update!(advisor: "Bert and Ernie", comment: "before the event")
+
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body).to include("Checked by", "Bert and Ernie", "before the event")
+    end
+
     it "has a later button and a fold triangle for every section" do
       get "/check_lists/#{check_list.id}/edit"
 
