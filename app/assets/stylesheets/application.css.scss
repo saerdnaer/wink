@@ -760,3 +760,27 @@ label.inline_choice {
   display: inline;
   margin-right: 1.2em;
 }
+
+// comparing two sets
+.compare_form {
+  margin: 0.8em 0;
+
+  select { max-width: 100%; }
+}
+
+table.compare {
+  td.count { text-align: center; white-space: nowrap; }
+  details summary { cursor: pointer; }
+  details ul { margin: 0.3em 0; padding-left: 1.2em; }
+
+  tr.only_a td { background: #ffe0d6; }
+  tr.only_b td { background: #d9e8ff; }
+  tr.different td { background: #fff3c4; }
+  tr.same td { color: #666; }
+}
+
+.compare_summary span {
+  display: inline-block;
+  margin-right: 1em;
+  padding: 0 0.6em;
+}

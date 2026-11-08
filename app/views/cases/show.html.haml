@@ -40,6 +40,7 @@
     %label Actions
     %span.actions
       %a{href: edit_case_path(@case)} edit
+      %a{href: compare_cases_path(a: @case.id)} compare with another set
       = link_to 'delete', case_path(@case), data: {:confirm => "Delete set '#{@case.name}'?"}, method: :delete
   %li
     %label Checklists

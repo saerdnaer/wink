@@ -1,0 +1,70 @@
+- content_for :title, "Compare sets - "
+
+%h2 Compare sets
+
+= form_with url: compare_cases_path, method: :get, local: true, class: "compare_form" do
+  = label_tag :a, "Set A:"
+  = select_tag :a, options_from_collection_for_select(@cases, :id, :name, @case_a&.id), prompt: "choose a set"
+  = label_tag :b, "Set B:"
+  = select_tag :b, options_from_collection_for_select(@cases, :id, :name, @case_b&.id), prompt: "choose a set"
+  %label.inline_choice
+    = check_box_tag :only, "differences", @only_differences
+    only differences
+  = submit_tag "Compare", name: nil
+  - if @case_a && @case_b
+    = link_to "swap", compare_cases_path(a: @case_b.id, b: @case_a.id, only: (@only_differences ? "differences" : nil))
+
+- if @comparison.nil?
+  %p
+    Choose two sets to see which items they have in common: items count as the same when they have the
+    same product or the same name, manufacturer and model. Shelves, compartments and boxes
+    are not compared.
+- elsif @case_a == @case_b
+  %p This is the same set twice.
+- else
+  - summary = @comparison.summary
+  %p.compare_summary
+    %span= "#{summary[:same]} identical"
+    %span= "#{summary[:different]} with a different number"
+    %span= "only in #{@case_a.name}: #{summary[:only_a]}"
+    %span= "only in #{@case_b.name}: #{summary[:only_b]}"
+
+  - rows = @only_differences ? @comparison.rows.reject { |row| row.status == :same } : @comparison.rows
+  - if rows.empty?
+    %p= @comparison.identical? ? "Both sets contain the same items." : "No items."
+  - else
+    %table.compare{border: 1}
+      %thead
+        %tr
+          %th Item
+          %th= @case_a.name
+          %th= @case_b.name
+          %th Difference
+      %tbody
+        - rows.each do |row|
+          %tr{class: row.status}
+            %td
+              = row.name
+              - if row.details.present?
+                %small.item_details= row.details
+            - [ [ row.items_a, @case_a ], [ row.items_b, @case_b ] ].each do |items, kit|
+              %td.count
+                - if items.empty?
+                  \–
+                - else
+                  %details
+                    %summary= "#{items.size}×"
+                    %ul
+                      - items.each do |item|
+                        %li
+                          %a{href: item_path(item)}= [ item.inventory_number, item.serial_number.presence, ("broken" if item.broken), ("missing" if item.missing) ].compact_blank.join(" · ").presence || "##{item.id}"
+            %td.count
+              - case row.status
+              - when :only_a
+                = "only in #{@case_a.name}"
+              - when :only_b
+                = "only in #{@case_b.name}"
+              - when :different
+                = format("%+d", row.count_b - row.count_a)
+              - else
+                \=

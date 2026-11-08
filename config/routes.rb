@@ -4,7 +4,11 @@ Rails.application.routes.draw do
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
   resource :dashboard, only: :show, controller: :dashboard
 
-  resources :cases
+  resources :cases do
+    collection do
+      get :compare
+    end
+  end
 
   get "/events/import", to: "events#import_events"
   resources :events

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class CasesController < ApplicationController
-  before_action :find_case, except: %i[index create new]
+  before_action :find_case, except: %i[index create new compare]
 
   def index
     @cases = {}
@@ -16,6 +16,15 @@ class CasesController < ApplicationController
       format.html
       format.json { render json: Case.all.to_json }
     end
+  end
+
+  # GET /cases/compare?a=1&b=2: item by item comparison of two sets
+  def compare
+    @cases = Case.order(:name)
+    @case_a = Case.find_by(id: params[:a])
+    @case_b = Case.find_by(id: params[:b])
+    @only_differences = params[:only] == "differences"
+    @comparison = CaseComparison.new(@case_a, @case_b) if @case_a && @case_b
   end
 
   def show
