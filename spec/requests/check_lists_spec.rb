@@ -259,4 +259,30 @@ RSpec.describe "Check lists" do
       expect(response.body).to include("section_later", "fold_toggle", "Long press: fold / unfold.")
     end
   end
+
+  describe "edit page: pencil on sections" do
+    let(:event) { Event.create!(name: "ev", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
+    let!(:check_list) { CheckList.create!(advisor: "andi") }
+    let!(:shelf) { Item.create!(name: "Rack 1", case: case_record) }
+
+    before do
+      EventCase.create!(event: event, case: case_record, check_list: check_list)
+      item.update!(location: shelf)
+      CheckListItem.create!(check_list: check_list, item: item)
+    end
+
+    it "links the section to the edit page of its location" do
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body).to include("section_edit", "/items/#{shelf.id}/edit")
+    end
+
+    it "has no pencil for items without a location" do
+      item.update!(location: nil)
+
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body).not_to include("section_edit")
+    end
+  end
 end

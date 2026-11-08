@@ -843,3 +843,10 @@ h3.section_heading {
   font-size: 1.1em;
 }
 
+// pencil in the headline of a check list section
+h3.section_heading .section_edit {
+  margin-left: 0.3em;
+  padding: 0 0.3em;
+  font-size: 0.8em;
+  text-decoration: none;
+}

@@ -70,7 +70,7 @@ $(function() {
     var cancel = function() { clearTimeout(timer); timer = null; };
 
     heading.on('pointerdown', function(event) {
-      if (event.button > 0 || $(event.target).closest('.section_later, .fold_toggle').length) { return; }
+      if (event.button > 0 || $(event.target).closest('.section_later, .fold_toggle, .section_edit').length) { return; }
       start = { x: event.clientX, y: event.clientY };
       cancel();
       timer = setTimeout(function() {
