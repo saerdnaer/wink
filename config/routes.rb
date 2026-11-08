@@ -28,5 +28,7 @@ Rails.application.routes.draw do
   resources :item_types
   resources :case_types
 
+  post "/graphql", to: "graphql#execute"
+
   root to: "root#show"
 end
