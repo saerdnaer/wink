@@ -25,6 +25,39 @@ RSpec.describe "Check lists" do
     end
   end
 
+  describe "check list result page" do
+    let(:event) { Event.create!(name: "ev", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
+    let!(:check_list) { CheckList.create!(advisor: "andi") }
+
+    before do
+      EventCase.create!(event: event, case: case_record, check_list: check_list)
+      CheckListItem.create!(check_list: check_list, item: item)
+    end
+
+    it "does not list items as missing before the check was started" do
+      get "/check_lists/#{check_list.id}"
+
+      expect(response.body).to include("Not started yet (1 items to check)")
+      expect(response.body).not_to include("Missing (")
+    end
+
+    it "lists unchecked items as not checked yet while checking" do
+      CheckListItem.create!(check_list: check_list, item: Item.create!(name: "Zwei", case: case_record), checked: true)
+
+      get "/check_lists/#{check_list.id}"
+
+      expect(response.body).to include("Not checked yet (1)")
+    end
+
+    it "lists unchecked items as missing once the check list is finished" do
+      check_list.update!(checked: true)
+
+      get "/check_lists/#{check_list.id}"
+
+      expect(response.body).to include("Missing (1)")
+    end
+  end
+
   describe "check list deep links" do
     let(:event) { Event.create!(name: "ev", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
     let!(:check_list) { CheckList.create!(advisor: "andi") }

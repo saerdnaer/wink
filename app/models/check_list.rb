@@ -34,6 +34,11 @@ class CheckList < ApplicationRecord
     check_list_items
   end
 
+  # A check list is started as soon as one item was checked (or it was finished).
+  def started?
+    checked || check_list_items.any?(&:checked)
+  end
+
   def items_without_shelfs
     check_list_items - locations
   end

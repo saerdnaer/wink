@@ -6,7 +6,7 @@
   %li
     %label Advisor:
     %span.advisor= @check_list.advisor
-  - unless @check_list.comment.empty?
+  - if @check_list.comment.present?
     %li
       %label Comment:
       %span.comment= @check_list.comment
@@ -36,8 +36,14 @@
 %ul
   -# TODO: Move items select to controller
   - items = @check_list.items_without_shelfs.group_by{ |ci| ci.checked }
-  - if items[false]
-    %h3= "Missing (#{items[false].count})"
+  - if items[false] && !@check_list.started?
+    %h3= "Not started yet (#{items[false].count} items to check)"
+    %p
+      Nothing was checked so far.
+      - unless @check_list.checked
+        %a{href: edit_check_list_path(@check_list)} Start checking
+  - elsif items[false]
+    %h3= "#{@check_list.checked ? 'Missing' : 'Not checked yet'} (#{items[false].count})"
     - items[false].group_by{|ci| ci.item.name}.each do |name,citems|
       - citems.each do |ci|
         %li.check_list_entry{id: ci.item.inventory_number.presence || ci.item.id.to_s}
