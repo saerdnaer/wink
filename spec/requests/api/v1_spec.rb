@@ -94,6 +94,14 @@ RSpec.describe "REST API v1 (JSON-LD)" do
       expect(list_elements.pluck("@type").uniq).to eq [ "ProductModel" ]
     end
 
+    it "lists the web page of a product as sameAs" do
+      product.update!(web_url: "https://c3voc.de/wiki/cam")
+
+      get "/api/v1/products/#{product.id}"
+
+      expect(json["sameAs"]).to include("https://c3voc.de/wiki/cam")
+    end
+
     it "maps product properties to schema.org terms" do
       get "/api/v1/products/#{product.id}"
 

@@ -15,7 +15,7 @@ class ProductSerializer
       "identifier" => identifiers(product),
       "image" => (urls.image_product_url(product) if product.image.present?),
       "url" => product.product_link.presence || product.url.presence,
-      "sameAs" => ([ product.wiki_url ] + Array(product.alternate_urls)).compact_blank,
+      "sameAs" => ([ product.web_url ] + Array(product.alternate_urls)).compact_blank,
       "wink:id" => product.id,
       "wink:vocClass" => product.voc_class,
       "wink:purchasePrice" => JsonLd.number(product.price),

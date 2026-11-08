@@ -20,11 +20,11 @@
       %label Product link
       %span
         %a{href: @product.product_link}= @product.product_link
-  - if @product.wiki_url.present?
+  - if @product.web_url.present?
     %li
       %label Wiki
       %span
-        %a{href: @product.wiki_url}= @product.wiki_url
+        %a{href: @product.web_url}= @product.web_url
   %br
   %li
     %label Actions

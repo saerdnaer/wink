@@ -36,7 +36,7 @@ RSpec.describe "Products" do
     it "is multipart and has an image upload" do
       get "/products/new"
 
-      expect(response.body).to include("multipart/form-data", %(type="file"), "product[image]")
+      expect(response.body).to include("multipart/form-data", %(type="file"), "product[image]", "product[web_url]")
     end
   end
 

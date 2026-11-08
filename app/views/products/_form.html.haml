@@ -31,8 +31,9 @@
   %label{for: 'product_product_link'}= "Product link:"
   = f.text_field :product_link
 %p
-  %label{for: 'product_wiki_url'}= "Wiki page:"
-  = f.text_field :wiki_url
+  %label{for: 'product_web_url'}= "Web page:"
+  %label.hint Product page of the manufacturer, wiki page, ...
+  = f.text_field :web_url
 %p
   %label{for: 'product_image'}= "Image:"
   %label.hint PNG, JPEG, GIF or WebP, up to 5 MB

@@ -96,7 +96,7 @@ class ProductsController < ApplicationController
 
   def product_params
     params.expect(product: %i[name description manufacturer model product_number gtin asin
-                              price insurance_value product_link url wiki_url voc_class])
+                              price insurance_value product_link url web_url voc_class])
   end
 
   def find_existing(result)

@@ -16,7 +16,7 @@ module Types
     field :image, String
     field :product_link, String
     field :url, String
-    field :wiki_url, String
+    field :web_url, String
     field :voc_class, String
     field :alternate_ids, [ String ]
     field :alternate_urls, [ String ]
