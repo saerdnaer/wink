@@ -2,6 +2,7 @@
 
 %h2= "Create '#{@event_case.case.name}' (#{@event_case.event.name}) checklist "
 = render partial: 'record_errors', locals: { record: @event_case }
+= render partial: 'record_errors', locals: { record: @event_case.check_list }
 
 = form_for(@event_case.check_list, as: :check_list) do |f|
   = render partial: 'form', locals: {f: f}, object: @event_case.check_list

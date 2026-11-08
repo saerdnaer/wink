@@ -7,7 +7,7 @@ class CheckList < ApplicationRecord
 
   has_many :check_list_items, dependent: :destroy
 
-  validates :advisor, presence: true
+  validates :advisor, presence: { message: "is missing, please enter your name (or the names of everyone checking)" }
 
   # rubocop:disable Naming/PredicateMethod
   def copy_items!

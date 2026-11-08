@@ -1,7 +1,7 @@
 %p
   %label{for: 'advisor'}= "Advisor(s):"
   %label.hint Bert and Ernie
-  = f.text_field :advisor
+  = f.text_field :advisor, required: true, autofocus: true, placeholder: "Your name"
 %p
   %label{for: 'comment'}= "Comment:"
   = f.text_area :comment

@@ -49,7 +49,8 @@ class CheckListsController < ApplicationController
     @event_case = EventCase.find(event_case_params[:event_case])
     @event_case.check_list = CheckList.new(check_list_params)
 
-    if @event_case.save!
+    # show the form again with an error message, e.g. when the advisor is missing
+    if @event_case.check_list.valid? && @event_case.save
       # TODO: move that into the model
       @event_case.check_list.copy_items!
 
@@ -61,7 +62,7 @@ class CheckListsController < ApplicationController
       )
       # rubocop:enable Layout/LineLength
     else
-      render action: "new"
+      render action: "new", status: :unprocessable_entity
     end
   end
 
