@@ -59,6 +59,24 @@ RSpec.describe "Check lists" do
       expect(check_list.reload.checked).to be true
     end
 
+    it "does not close or reopen the list when the form is saved" do
+      get "/check_lists/#{check_list.id}/edit"
+      expect(response.body).not_to include("Finished checking?")
+
+      put "/check_lists/#{check_list.id}", params: { check_list_items: {}, check_list: { checked_check_list_items: [] } }
+      expect(check_list.reload.checked).to be_falsey
+
+      check_list.update!(checked: true)
+      put "/check_lists/#{check_list.id}", params: { check_list: { checked_check_list_items: [] } }
+      expect(check_list.reload.checked).to be true
+    end
+
+    it "has a foldable intro on the edit page" do
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body).to include("check_list_intro", "<summary>How does this work?</summary>")
+    end
+
     it "has no finish link once the check list is finished" do
       check_list.update!(checked: true)
 

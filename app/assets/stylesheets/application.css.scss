@@ -96,6 +96,21 @@ aside.check_lists {
   background: #f4f4f4;
 }
 
+// the intro can be folded; the summary has the same chevron as the sections
+.check_list_intro > summary {
+  margin: 0.4em 0;
+  font-weight: bold;
+  cursor: pointer;
+  list-style: none;
+
+  &::-webkit-details-marker { display: none; }
+  &::before {
+    @extend %chevron;
+    content: "";
+  }
+}
+.check_list_intro:not([open]) > summary::before { transform: rotate(-45deg); }
+
 // "save before leaving?" dialog of the check list edit page
 .leave_modal {
   position: fixed;
@@ -810,14 +825,27 @@ table.running_sets {
   progress { width: 8em; margin-right: 0.5em; vertical-align: middle; }
 }
 
-// check list sections: fold triangle and "later" button
+// chevron: points down when open (aria-expanded="true"), right when folded
+%chevron {
+  display: inline-block;
+  width: 0.45em;
+  height: 0.45em;
+  margin: 0 0.5em 0.15em 0.2em;
+  border-right: 2px solid #555;
+  border-bottom: 2px solid #555;
+  transform: rotate(45deg);
+  transition: transform 0.15s;
+  cursor: pointer;
+  vertical-align: middle;
+
+  &[aria-expanded="false"] { transform: rotate(-45deg); }
+}
+
+// check list sections: fold chevron and "later" button
 h3.section_heading {
   .fold_toggle {
-    display: inline-block;
-    width: 1.1em;
-    margin-right: 0.2em;
-    color: #555;
-    cursor: pointer;
+    @extend %chevron;
+    margin-right: 0.3em;
   }
 
   .section_later {

@@ -4,7 +4,7 @@
       - if location.empty?
         %a{name: Digest::MD5.hexdigest("nolocation")}
         %h3.section_heading{id: Digest::MD5.hexdigest("nolocation"), title: "Double-click: check / uncheck the whole section. Long press: fold / unfold."}
-          %span.fold_toggle{role: "button", tabindex: 0, "aria-expanded": "true", title: "Fold / unfold"} ▼
+          %span.fold_toggle{role: "button", tabindex: 0, "aria-expanded": "true", title: "Fold / unfold"}
           no location
           %span.progress{data: { total: items.count }}= "(#{items.count(&:checked)}/#{items.count})"
           %button.section_later{type: "button", title: "Move this section to the end"} later
@@ -12,7 +12,7 @@
         %p.export_cases
           %a{name: "#{Digest::MD5.hexdigest(location)}"}
           %h3.section_heading{id: Digest::MD5.hexdigest(location), title: "Double-click: check / uncheck the whole section. Long press: fold / unfold."}
-            %span.fold_toggle{role: "button", tabindex: 0, "aria-expanded": "true", title: "Fold / unfold"} ▼
+            %span.fold_toggle{role: "button", tabindex: 0, "aria-expanded": "true", title: "Fold / unfold"}
             = location
             - location_item = items.first.item.location
             - if location_item
@@ -58,12 +58,3 @@
               %div.stack_items
                 - stack.each do |cli|
                   = render partial: 'checklist_card', locals: { cli: cli, count_input: !stack.all? { |entry| entry.item.countable } }
-
-.noborder
-  %table
-    %tbody
-      %tr
-        %td
-          = check_box(:check_list, :checked, checked_value: true, unchecked_value: false)
-        %td
-          %label{ for: "check_list_checked" }= "Finished checking?"

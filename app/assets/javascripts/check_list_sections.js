@@ -32,7 +32,7 @@ $(function() {
 
   var set_folded = function(section, folded) {
     section.toggleClass('folded', folded);
-    section.find('.fold_toggle').text(folded ? '▶' : '▼').attr('aria-expanded', folded ? 'false' : 'true');
+    section.find('.fold_toggle').attr('aria-expanded', folded ? 'false' : 'true');
   };
 
   // restore the view of an earlier visit

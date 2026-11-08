@@ -13,7 +13,8 @@
   - if @check_list.comment.present?
     %span.hint= "– #{@check_list.comment}"
 
-%div.check_list_intro
+%details.check_list_intro{open: true}
+  %summary How does this work?
   %p
     Go through the set and tick every item that is there and works.
     Tap an item to tick it. Identical items without inventory number are stacked
@@ -27,7 +28,7 @@
     section. Order and folded sections are remembered on this device.
   %p
     <b>Save</b> stores your ticks and stays here, <b>Return</b> stores them and
-    shows the result. Tick <i>Finished checking?</i> at the bottom when you are done.
+    shows the result. Press <b>Finish</b> on the result page when you are done.
     Until you save, your changes are only kept on this device (local storage of
     your browser), so you do not lose them if the connection drops. When you leave
     the page with unsaved changes you are asked whether to save them first.
@@ -253,5 +254,16 @@
 
       // drop the text selection a double-click causes
       if (window.getSelection) { window.getSelection().removeAllRanges(); }
+    });
+  });
+
+:javascript
+  // the folded state of the intro is kept on this device
+  $(function() {
+    var intro = document.querySelector('details.check_list_intro');
+    if (!intro) { return; }
+    try { if (window.localStorage.getItem('wink:intro_folded') === '1') { intro.open = false; } } catch (e) { /* ignore */ }
+    intro.addEventListener('toggle', function() {
+      try { window.localStorage.setItem('wink:intro_folded', intro.open ? '0' : '1'); } catch (e) { /* ignore */ }
     });
   });

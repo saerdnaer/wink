@@ -106,13 +106,7 @@ class CheckListsController < ApplicationController
         render action: "edit"
     end
 
-    if ActiveModel::Type::Boolean.new.cast(check_list_params[:checked])
-      finish_check_list
-    else
-      @check_list.checked = false
-    end
-
-    @check_list.save!
+    # closing the list is done by #finish
 
     if params[:return]
       redirect_to check_list_path(params[:id])
