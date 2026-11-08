@@ -1,0 +1,35 @@
+- content_for :title, "Item not found - "
+
+%h2 Item not found
+%p
+  No item with id, inventory number or serial number
+  %strong= @query
+  exists.
+
+= form_with url: items_path, method: :get, local: true do
+  = label_tag :q, "Search items:"
+  = search_field_tag :q, @query, autofocus: true
+  = submit_tag "Search", name: nil
+
+- if @items.any?
+  %h3 Similar items
+  %table{border: 1}
+    %thead
+      %tr
+        %th Set
+        %th Name
+        %th Inventory number
+        %th Serial number
+    %tbody
+      - @items.each do |item|
+        %tr
+          %td= item.case&.name
+          %td
+            %a{href: item_path(item)}= item.name
+          %td= item.inventory_number
+          %td= item.serial_number
+- else
+  %p No similar items found.
+
+%p
+  %a{href: items_path} all items

@@ -1,6 +1,6 @@
-- content_for :title, "#{@item.case.acronym}: #{@item.name} - "
+- content_for :title, "#{@item.case&.acronym}: #{@item.name} - "
 
-%h2= "#{@item.case.name}: #{@item.name}"
+%h2= "#{@item.case&.name}: #{@item.name}"
 = render partial: 'record_errors', locals: { record: @item }
 
 %ol.properties
@@ -36,7 +36,8 @@
   %li
     %label Set
     %span.case
-      %a{href: case_path(@item.case)}= @item.case.name
+      - if @item.case
+        %a{href: case_path(@item.case)}= @item.case.name
   - if @item.location
     %li
       %label Location
@@ -73,7 +74,7 @@
   %li
     %label Created at
     %span.created_at= l @item.created_at
-  - unless @item.created_at == @item.updated_at
+  - if @item.updated_at && @item.created_at != @item.updated_at
     %li
       %label Updated at
       %span.updated_at= l @item.updated_at
@@ -83,7 +84,7 @@
     %span.actions
       - unless @item.deleted
         %a{href: edit_item_path(@item)} edit
-        = link_to 'delete', item_path(@item), data: {:confirm => "Delete '#{@item.name}' (#{@item.case.acronym})?"}, method: :delete
+        = link_to 'delete', item_path(@item), data: {:confirm => "Delete '#{@item.name}' (#{@item.case&.acronym})?"}, method: :delete
 
       %a{href: clone_item_path(@item)} clone
 

@@ -34,4 +34,20 @@ RSpec.describe "Item pages" do
       expect(response.headers).not_to have_key("X-Frame-Options")
     end
   end
+
+  describe "unknown item on the HTML pages" do
+    it "shows a 404 page with a search form and similar items" do
+      get "/items/VOC0061"
+
+      expect(response).to have_http_status(:not_found)
+      expect(response.body).to include("Item not found", "VOC0061", "VOC00618")
+    end
+
+    it "answers .jsonld with a 404 document" do
+      get "/items/nope.jsonld"
+
+      expect(response).to have_http_status(:not_found)
+      expect(json["@type"]).to eq "Error"
+    end
+  end
 end

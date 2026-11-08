@@ -142,6 +142,30 @@ class ItemsController < ApplicationController
 
   def find_item
     @item = Item.unscoped.lookup!(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    item_not_found
+  end
+
+  # 404 page that offers a search for the requested id (inventory/serial number).
+  def item_not_found
+    @query = params[:id].to_s
+
+    respond_to do |format|
+      format.html do
+        @items = similar_items(@query)
+        render :not_found, status: :not_found
+      end
+      format.json { render json: { error: "item not found" }, status: :not_found }
+      format.jsonld { render_jsonld({ "@type" => "Error", "name" => "not found" }, status: :not_found) }
+      format.any { head :not_found }
+    end
+  end
+
+  def similar_items(query)
+    Item.existing.search(query).includes(:case).order(:name).limit(50)
+  rescue ActiveRecord::StatementInvalid
+    # full text search needs PostgreSQL
+    Item.none
   end
 
   def item_params
