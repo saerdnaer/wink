@@ -253,6 +253,12 @@ RSpec.describe "Check lists" do
       expect(response.body).to include("Checked by", "Bert and Ernie", "before the event")
     end
 
+    it "has a switch for the serial numbers, which are hidden by default" do
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body).to include("show serial numbers", %(id="show_serials"), "S/N SN-42")
+    end
+
     it "has a later button and a fold triangle for every section" do
       get "/check_lists/#{check_list.id}/edit"
 
