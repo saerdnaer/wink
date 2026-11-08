@@ -18,6 +18,8 @@ class Item < ApplicationRecord
 
   scope :existing, -> { where(deleted: false) }
   scope :deleted, -> { where(deleted: true) }
+  # `hidden` is nullable: only items explicitly flagged as hidden are excluded
+  scope :not_hidden, -> { where(hidden: [ false, nil ]) }
 
   # Columns searched via Postgres full text search (prefix match per word)
   SEARCH_TEXT_COLUMNS = %w[items.name items.description items.manufacturer items.model

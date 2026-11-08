@@ -13,7 +13,8 @@ class CheckList < ApplicationRecord
   def copy_items!
     return false if check_list_items.any?
 
-    event_case.case.not_deleted_items.each do |ec_item|
+    # hidden items are not part of a check list
+    event_case.case.not_deleted_items.not_hidden.each do |ec_item|
       cl_item = CheckListItem.new
       cl_item.item = ec_item
       cl_item.item.broken = ec_item.broken

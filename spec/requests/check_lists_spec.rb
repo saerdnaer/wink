@@ -143,4 +143,22 @@ RSpec.describe "Check lists" do
       expect(response.body).to include("2×")
     end
   end
+
+  describe "copying items into a new check list" do
+    let(:event) { Event.create!(name: "ev", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
+
+    it "skips hidden and deleted items" do
+      visible = Item.create!(name: "sichtbar", case: case_record, hidden: false)
+      unset = Item.create!(name: "ungesetzt", case: case_record, hidden: nil)
+      hidden = Item.create!(name: "versteckt", case: case_record, hidden: true)
+      event_case = EventCase.create!(event: event, case: case_record)
+      event_case.update!(check_list: CheckList.create!(advisor: "andi"))
+
+      event_case.check_list.copy_items!
+
+      ids = event_case.check_list.check_list_items.pluck(:item_id)
+      expect(ids).to include(visible.id, unset.id, item.id)
+      expect(ids).not_to include(hidden.id, deleted_item.id)
+    end
+  end
 end
