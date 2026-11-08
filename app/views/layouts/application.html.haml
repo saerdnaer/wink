@@ -14,6 +14,11 @@
     #header
       %h1
         %a{href: root_path} WINK
+      -# global item search; while checking a list the page has its own item filter
+      - unless controller.controller_name == 'check_lists' && action_name == 'edit'
+        .header_search
+          = form_with url: items_path, method: :get, local: true do
+            = search_field_tag :q, params[:q], placeholder: 'search items…', 'aria-label': 'Search items'
       -# burger button, only visible on small screens (see application.css.scss)
       %button#menu_toggle{type: "button", "aria-label": "Menu", "aria-expanded": "false", "aria-controls": "menu_list"} ☰ Menu
 
@@ -32,11 +37,6 @@
           = active_link_to('items', items_path)
         %li
           = active_link_to('products', products_path)
-        -# while checking a list the page has its own item filter
-        - unless controller.controller_name == 'check_lists' && action_name == 'edit'
-          %li.search
-            = form_with url: items_path, method: :get, local: true do
-              = search_field_tag :q, params[:q], placeholder: 'search items…'
 
       - if controller.controller_name == 'cases'
         %ul.submenu

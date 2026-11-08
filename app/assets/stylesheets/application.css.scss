@@ -328,24 +328,46 @@ table {
   }
 }
 
-// burger menu: hidden on wide screens, collapses the menu on small ones.
-// The button sits in the header, on the same line as the WINK logo.
+// header line: logo, global search (right) and, on small screens, the burger button
 #header {
   position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  background-color: #000;
+
+  .header_search {
+    margin: 0 25px 0 auto;
+
+    form { margin: 0; }
+    input[type=search] { width: 16em; max-width: 100%; }
+  }
 }
 
 #menu_toggle {
   display: none;
 }
 
+// small screens: burger button on the logo line, search on its own line below it,
+// the menu collapses
 @media (max-width: 700px) {
+  #header {
+    .header_search {
+      order: 3;
+      flex: 1 0 100%;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0 16px 10px;
+
+      input[type=search] { box-sizing: border-box; width: 100%; }
+    }
+  }
+
   #menu_toggle {
     display: block;
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-    margin: 0;
+    order: 2;
+    align-self: stretch;
+    margin: 0 0 0 auto;
     padding: 0 16px;
     border: none;
     border-radius: 0;
@@ -363,12 +385,6 @@ table {
       float: none;
 
       a { text-align: left; }
-    }
-
-    li.search {
-      padding: 6px 16px 10px;
-
-      input { box-sizing: border-box; width: 100%; }
     }
   }
 }
