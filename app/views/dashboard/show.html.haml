@@ -52,12 +52,12 @@
                   - when "none"
                     no checklist yet
                   - when "open"
-                    = "not started (#{progress[:total]} items)"
+                    %a{href: check_list_path(check_list), title: "Show the checklist"}= "not started (#{progress[:total]} items)"
                   - when "running"
                     %progress{value: progress[:checked], max: progress[:total]}
-                    = "#{progress[:checked]} of #{progress[:total]} checked"
+                    %a{href: check_list_path(check_list), title: "Show the checklist"}= "#{progress[:checked]} of #{progress[:total]} checked"
                   - else
-                    = "finished (#{progress[:checked]} of #{progress[:total]} checked)"
+                    %a{href: check_list_path(check_list), title: "Show the checklist"}= "finished (#{progress[:checked]} of #{progress[:total]} checked)"
 
 %a{name: "events"}
 %h3 Upcoming and recent events
