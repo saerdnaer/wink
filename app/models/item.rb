@@ -49,6 +49,15 @@ class Item < ApplicationRecord
     relation
   }
 
+  # Finds an item by numeric id, otherwise by inventory number or serial number.
+  # Respects the current scope, e.g. `Item.existing.lookup!("VOC00618")`.
+  def self.lookup!(identifier)
+    identifier = identifier.to_s
+    return find(identifier) if identifier.match?(/\A\d+\z/)
+
+    find_by(inventory_number: identifier) || find_by!(serial_number: identifier)
+  end
+
   def name_with_model
     if model.blank?
       if manufacturer.blank?

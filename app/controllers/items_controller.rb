@@ -131,15 +131,7 @@ class ItemsController < ApplicationController
   private
 
   def find_item
-    id = params[:id].to_s
-
-    @item = if id.match?(/\A\d+\z/)
-      Item.unscoped.find(id)
-    else
-      # Not an integer: look up by inventory number (e.g. VOC00618) or serial number
-      Item.unscoped.find_by(inventory_number: id) ||
-        Item.unscoped.find_by!(serial_number: id)
-    end
+    @item = Item.unscoped.lookup!(params[:id])
   end
 
   def item_params
