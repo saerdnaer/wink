@@ -2,6 +2,7 @@
 
 %h2= "#{@item.case&.name}: #{@item.name}"
 = render partial: 'record_errors', locals: { record: @item }
+= render partial: 'check_lists'
 
 %ol.properties
   %li

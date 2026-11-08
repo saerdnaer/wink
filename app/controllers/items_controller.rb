@@ -73,7 +73,7 @@ class ItemsController < ApplicationController
     @subitems = Item.where(item: @item)
 
     respond_to do |format|
-      format.html
+      format.html { load_check_lists }
       format.json { render json: @item.to_json }
       format.jsonld { render_jsonld ItemSerializer.call(@item, urls: self, detail: true) }
     end
@@ -139,6 +139,25 @@ class ItemsController < ApplicationController
   end
 
   private
+
+  # Check lists of the item's kit plus all check lists the item is part of,
+  # newest first. @check_list_items maps check_list_id => entry of this item.
+  def load_check_lists
+    entries = CheckListItem.where(item: @item).index_by(&:check_list_id)
+    ids = entries.keys
+    ids += @item.case.check_lists.pluck(:id) if @item.case
+
+    @check_list_items = entries
+    @check_lists = CheckList.where(id: ids.uniq).includes(event_case: %i[event case])
+                            .sort_by { |cl| cl.event&.start_date ? -cl.event.start_date.to_time.to_i : 0 }
+
+    # running events the kit takes part in, but without a check list yet
+    @creatable_event_cases = if @item.case
+      EventCase.where(case: @item.case, check_list_id: nil).joins(:event).merge(Event.running).includes(:event)
+    else
+      []
+    end
+  end
 
   def find_item
     @item = Item.unscoped.lookup!(params[:id])

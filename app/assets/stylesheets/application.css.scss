@@ -44,6 +44,41 @@ body {
    padding-inline-start: 0;
  }
 
+// check lists panel next to an item (floats into the white space on the right)
+aside.check_lists {
+  float: right;
+  box-sizing: border-box;
+  width: 28%;
+  min-width: 18em;
+  margin: 0 0 1em 1em;
+  padding: 0.5em 1em;
+  border: 1px solid #ccc;
+
+  h3 {
+    margin-top: 0;
+  }
+
+  h4 {
+    margin: 0.8em 0 0.2em;
+  }
+
+  ul {
+    list-style: none;
+    padding-inline-start: 0;
+    margin: 0;
+  }
+
+  li {
+    margin-bottom: 0.4em;
+  }
+
+  .state {
+    display: block;
+    font-size: 0.85em;
+    color: #555;
+  }
+}
+
 // forms
 input[type=text], textarea {
    width: 250px;

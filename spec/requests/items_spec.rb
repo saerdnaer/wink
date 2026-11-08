@@ -50,4 +50,37 @@ RSpec.describe "Item pages" do
       expect(json["@type"]).to eq "Error"
     end
   end
+
+  describe "check lists on the item page" do
+    it "copes with check lists that belong to no event" do
+      CheckListItem.create!(check_list: CheckList.create!(advisor: "andi"), item: item)
+
+      get "/items/#{item.id}"
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "lists open and closed check lists" do
+      open_list = CheckList.create!(advisor: "andi")
+      closed_list = CheckList.create!(advisor: "andi", checked: true)
+      [ open_list, closed_list ].each { |cl| CheckListItem.create!(check_list: cl, item: item) }
+
+      get "/items/#{item.id}"
+
+      expect(response.body).to include("Open (1)", "Closed (1)")
+    end
+  end
+
+  describe "creating check lists from the item page" do
+    it "offers running events of the kit without a check list" do
+      running = Event.create!(name: "running", start_date: Time.zone.today - 1, end_date: Time.zone.today + 1, location: "x")
+      past = Event.create!(name: "past", start_date: Time.zone.today - 30, end_date: Time.zone.today - 28, location: "x")
+      [ running, past ].each { |event| EventCase.create!(event: event, case: case_record) }
+
+      get "/items/#{item.id}"
+
+      expect(response.body).to include("Create check list", "for running")
+      expect(response.body).not_to include("for past")
+    end
+  end
 end

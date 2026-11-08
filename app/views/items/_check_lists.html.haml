@@ -1,0 +1,29 @@
+- open_lists, closed_lists = @check_lists.partition { |cl| !cl.checked }
+
+%aside.check_lists
+  %h3 Check lists
+  - if @check_lists.empty?
+    %p none
+  - { "Open" => open_lists, "Closed" => closed_lists }.each do |title, lists|
+    - next if lists.empty?
+    %h4= "#{title} (#{lists.size})"
+    %ul
+      - lists.each do |check_list|
+        - entry = @check_list_items[check_list.id]
+        - anchor = @item.inventory_number.presence || @item.id
+        - # open lists: jump to the item's checkbox; closed lists: to its entry on the result page
+        - target = check_list.checked ? check_list_path(check_list, anchor: anchor) : edit_check_list_path(check_list, anchor: anchor)
+        %li
+          %a{href: target}= [ check_list.event&.name, check_list.case&.name ].compact.join(" – ").presence || "Check list ##{check_list.id}"
+          %span.state
+            - if entry.nil?
+              not on this list
+            - else
+              = [ ("checked" if entry.checked), ("broken" if entry.broken), ("missing" if entry.missing) ].compact.join(", ").presence || "not checked yet"
+  - if @creatable_event_cases.any?
+    %h4 Create check list
+    %ul
+      - @creatable_event_cases.each do |event_case|
+        %li
+          %a{href: new_check_list_path(event: event_case.event_id, case: event_case.case_id)}= "for #{event_case.event.name}"
+          %span.state= "#{l(event_case.event.start_date)} – #{l(event_case.event.end_date)}"
