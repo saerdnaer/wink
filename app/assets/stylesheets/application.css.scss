@@ -79,6 +79,14 @@ aside.check_lists {
   }
 }
 
+// check list edit page: changes kept in the local storage
+.offline_banner {
+  margin: 0.5em 0;
+  padding: 0.4em 0.8em;
+  border: 1px solid #ffb300;
+  background: #fff6d6;
+}
+
 // check list: inventory number next to the item name, deep link target
 .checklist_item .inventory_number {
   margin-left: 0.5em;

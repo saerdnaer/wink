@@ -16,7 +16,7 @@
 
 = render partial: 'record_errors', locals: { record: @check_list }
 
-= form_for(@check_list.check_list_items, as: :check_list_items, url: check_list_path(@check_list), method: 'PUT') do |f|
+= form_for(@check_list.check_list_items, as: :check_list_items, url: check_list_path(@check_list), method: 'PUT', html: { data: { check_list_id: @check_list.id } }) do |f|
   = render partial: 'form_check_item', locals: {f: f}, object: @check_list_item
   %div.floating_form_actions
     = f.submit "Save"
@@ -174,10 +174,8 @@
       var inputs = section.find('.checklist_item:not(.filtered_out) input[type="checkbox"]');
       var all_checked = inputs.filter(':not(:checked)').length == 0;
 
-      inputs.prop('checked', !all_checked);
-      update_progress(section);
-      // the stacks (colour and "n/m checked") have to follow as well
-      section.find('.checklist_stack').each(function() { update_stack($(this)); });
+      // "change" updates progress, stacks and the copy in the local storage
+      inputs.prop('checked', !all_checked).trigger('change');
 
       // drop the text selection a double-click causes
       if (window.getSelection) { window.getSelection().removeAllRanges(); }

@@ -161,4 +161,29 @@ RSpec.describe "Check lists" do
       expect(ids).not_to include(hidden.id, deleted_item.id)
     end
   end
+
+  describe "edit page: local storage and user name" do
+    let(:event) { Event.create!(name: "ev", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
+    let!(:check_list) { CheckList.create!(advisor: "andi") }
+
+    before do
+      EventCase.create!(event: event, case: case_record, check_list: check_list)
+      CheckListItem.create!(check_list: check_list, item: item)
+    end
+
+    it "marks the form so the browser can keep its state in the local storage" do
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body).to include(%(data-check-list-id="#{check_list.id}"))
+    end
+
+    it "lets the browser remember the advisor name" do
+      other_case = Case.create!(name: "Video", acronym: "VID", case_type: case_type)
+      EventCase.create!(event: event, case: other_case)
+
+      get "/check_lists/new", params: { event: event.id, case: other_case.id }
+
+      expect(response.body).to include(%(data-remember-username="true"))
+    end
+  end
 end
