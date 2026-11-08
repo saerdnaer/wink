@@ -27,7 +27,7 @@ RSpec.describe "Organisations" do
     it "is linked in the menu" do
       get "/items"
 
-      expect(response.body).to include(%(href="/organisations"))
+      expect(response.body).to include(%(href="/organisations"), ">orgs<")
     end
 
     it "has role checkboxes and a logo upload" do
