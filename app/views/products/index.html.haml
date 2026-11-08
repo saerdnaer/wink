@@ -16,6 +16,7 @@
       %th.name Name
       %th.manufacturer Manufacturer
       %th.model Model
+      %th.description Description
       %th.actions Actions
   %tbody
     - @products.each do |product|
@@ -25,8 +26,13 @@
             = image_tag image_product_path(product), alt: product.name, class: "image_thumb"
         %td.no_color
           %a{href: product_path(product)}= product.name
-        %td.no_color= product.manufacturer
+        %td.no_color= manufacturer_link(product, @organisations)
         %td.no_color= product.model
+        %td.no_color
+          - if product.web_url.present?
+            %a{href: product.web_url, target: "_blank", rel: "noopener"}= product.description.presence || product.web_url
+          - else
+            = product.description
         %td
           %a{href: product_path(product)} show
           %a{href: edit_product_path(product)} edit

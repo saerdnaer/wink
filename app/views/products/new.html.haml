@@ -6,5 +6,20 @@
 = form_for(@product, as: :product) do |f|
   = render partial: 'form', locals: { f: f }
 
-  = f.submit "Create"
+  - if @duplicates.present?
+    .duplicate_notice
+      %p
+        %b Similar products already exist:
+      %ul
+        - @duplicates.each do |duplicate|
+          %li
+            %a{href: product_path(duplicate), target: "_blank"}= duplicate.name
+            = [duplicate.manufacturer, duplicate.model].compact_blank.join(" ")
+            = button_tag "Merge into this", name: "merge_into", value: duplicate.id
+      %p.hint
+        Merging fills only the empty fields of the existing product with your input.
+        The image is not kept when the form is shown again: select it again if you need it.
+    = f.submit "Create anyway", name: "create_anyway"
+  - else
+    = f.submit "Create"
   = link_to 'Cancel', products_path

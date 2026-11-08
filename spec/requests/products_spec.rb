@@ -36,7 +36,61 @@ RSpec.describe "Products" do
     it "is multipart and has an image upload" do
       get "/products/new"
 
-      expect(response.body).to include("multipart/form-data", %(type="file"), "product[image]", "product[web_url]")
+      expect(response.body).to include("multipart/form-data", %(type="file"), "product[image]", "product[web_url]", "data-image-drop")
+    end
+  end
+
+  describe "manufacturer and organisations" do
+    let!(:organisation) { Organisation.create!(name: "Blackmagic Design", roles: [ "manufacturer" ]) }
+
+    it "links the manufacturer to the organisation of the same name, ignoring case" do
+      product = Product.create!(name: "Mini", manufacturer: " blackmagic design ")
+
+      get "/products/#{product.id}"
+
+      expect(response.body).to include(%(<a href="/organisations/#{organisation.id}"))
+    end
+
+    it "keeps an unknown manufacturer as plain text" do
+      product = Product.create!(name: "Cable", manufacturer: "Some local shop")
+
+      get "/products/#{product.id}"
+
+      expect(response.body).to include("Some local shop")
+      expect(response.body).not_to include(%(href="/organisations/))
+    end
+
+    it "links the manufacturer in the list" do
+      Product.create!(name: "Mini", manufacturer: "Blackmagic Design")
+
+      get "/products"
+
+      expect(response.body).to include(%(<a href="/organisations/#{organisation.id}">Blackmagic Design</a>))
+    end
+
+    it "offers the organisations as suggestions but accepts any text" do
+      get "/products/new"
+
+      expect(response.body).to match(/list=.manufacturer_organisations.*<option value=.Blackmagic Design./m)
+    end
+
+    it "lists the products on the page of the organisation" do
+      product = Product.create!(name: "Mini", manufacturer: "Blackmagic Design")
+
+      get "/organisations/#{organisation.id}"
+
+      expect(response.body).to match(%r{href=.\/products\/#{product.id}.})
+    end
+
+    it "keeps the products linked when the organisation is renamed" do
+      product = Product.create!(name: "Mini", manufacturer: "Blackmagic Design")
+      other = Product.create!(name: "Other", manufacturer: "Sony")
+
+      organisation.update!(name: "Blackmagic")
+
+      expect(product.reload.manufacturer).to eq "Blackmagic"
+      expect(product.manufacturer_organisation).to eq organisation
+      expect(other.reload.manufacturer).to eq "Sony"
     end
   end
 
@@ -48,6 +102,44 @@ RSpec.describe "Products" do
       expect(response).to redirect_to("/products/#{product.id}")
       expect(product.image).to match(/\A\h{24}\.png\z/)
       expect(stored_files).to eq [ product.image ]
+    end
+
+    it "asks to merge when a similar product exists" do
+      existing = Product.create!(name: "Cam", manufacturer: "Sony", model: "Z200")
+      count = Product.count
+
+      post "/products", params: { product: { name: "Camera", manufacturer: "sony", model: "Z-200" } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include("Similar products already exist", %(value="#{existing.id}"), "Create anyway")
+      expect(Product.count).to eq count
+    end
+
+    it "creates the product anyway when confirmed" do
+      Product.create!(name: "Cam")
+
+      post "/products", params: { product: { name: "Cam" }, create_anyway: "1" }
+
+      expect(Product.where(name: "Cam").count).to eq 2
+    end
+
+    it "merges into the existing product, filling only empty fields and keeping its image" do
+      existing = Product.create!(name: "Cam", model: "Z200", image: "keep.png")
+      count = Product.count
+
+      post "/products", params: { product: { name: "Other name", model: "Z200", manufacturer: "Sony", details: "4K", image: upload(png) },
+                                  merge_into: existing.id }
+
+      expect(response).to redirect_to("/products/#{existing.id}")
+      expect(existing.reload).to have_attributes(name: "Cam", manufacturer: "Sony", details: "4K", image: "keep.png")
+      expect(Product.count).to eq count
+      expect(stored_files).to be_empty
+    end
+
+    it "stores short description and details separately" do
+      post "/products", params: { product: { name: "Box", description: "Eurobox", details: "40 x 30 cm" } }
+
+      expect(Product.find_by!(name: "Box")).to have_attributes(description: "Eurobox", details: "40 x 30 cm")
     end
 
     it "creates a product without an image" do

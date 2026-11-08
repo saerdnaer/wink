@@ -36,6 +36,13 @@
       %span
         - @organisation.children.existing.order(:name).each do |child|
           %a{href: organisation_path(child)}= child.name
+  - products = @organisation.manufactured_products.order(:name)
+  - if products.any?
+    %li
+      %label Products
+      %span
+        - products.each do |product|
+          %a{href: product_path(product)}= product.name
   %br
   %li
     %label Actions

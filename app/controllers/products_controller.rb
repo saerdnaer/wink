@@ -9,6 +9,7 @@ class ProductsController < ApplicationController
     respond_to do |format|
       format.html do
         @products = Product.existing.order(:name)
+        @organisations = Product.organisations_by_name
       end
 
       format.json do
@@ -35,8 +36,13 @@ class ProductsController < ApplicationController
   def from_url
     result = ProductImporter.call(params[:url].to_s)
 
-    existing = find_existing(result)
-    return redirect_to(product_path(existing), notice: "This product already exists.") if existing
+    return merge_import(Product.existing.find(params[:merge_into]), result) if params[:merge_into].present?
+
+    @duplicates = params[:create_anyway].present? ? [] : Product.similar_to(result.attributes)
+    if @duplicates.any?
+      @result = result
+      return render(:from_url_duplicates, status: :unprocessable_content)
+    end
 
     product = Product.new(result.attributes.merge(meta: { "source_url" => result.source_url,
                                                           "imported_at" => Time.current.iso8601 }))
@@ -53,6 +59,10 @@ class ProductsController < ApplicationController
 
   def create
     @product = Product.new(product_params)
+    return merge_into_existing(Product.existing.find(params[:merge_into])) if params[:merge_into].present?
+
+    @duplicates = params[:create_anyway].present? ? [] : Product.similar_to(@product.attributes)
+    return render(action: "new", status: :unprocessable_content) if @duplicates.any?
 
     if save_with_image(@product, store: ProductImageStore, attribute: :image)
       redirect_to product_path(@product), notice: "Created product #{@product.name}"
@@ -92,15 +102,38 @@ class ProductsController < ApplicationController
   end
 
   def product_params
-    params.expect(product: %i[name description manufacturer model product_number gtin asin
+    params.expect(product: %i[name description details manufacturer model product_number gtin asin
                               price insurance_value product_link url web_url voc_class])
   end
 
-  def find_existing(result)
-    gtin = result.attributes[:gtin]
-    link = result.attributes[:product_link]
+  # Merging never overwrites: only empty fields of the existing product are filled.
+  def fillable(target, attributes)
+    attributes.to_h.symbolize_keys.compact_blank.reject { |key, _| target[key].present? }
+  end
 
-    (Product.existing.find_by(gtin: gtin) if gtin) || (Product.existing.find_by(product_link: link) if link)
+  # The form of a new product was submitted with "Merge into <product>".
+  def merge_into_existing(target)
+    target.assign_attributes(fillable(target, product_params))
+    params[:product].delete(:image) if target.image.present? # keep the existing image
+
+    if save_with_image(target, store: ProductImageStore, attribute: :image)
+      redirect_to product_path(target), notice: "Merged the data into '#{target.name}'"
+    else
+      @product = target
+      render action: "edit", status: :unprocessable_content
+    end
+  end
+
+  # The import of a URL was confirmed with "Merge into <product>".
+  def merge_import(target, result)
+    target.assign_attributes(fillable(target, result.attributes))
+    target.meta = { "source_url" => result.source_url }.merge(target.meta || {})
+    unless target.save
+      return redirect_to(product_path(target), alert: "Could not merge: #{target.errors.full_messages.to_sentence}")
+    end
+
+    image_note = target.image.present? ? "" : import_image(target, result.image_url)
+    redirect_to product_path(target), notice: "Merged the data of #{URI.parse(result.source_url).host} into '#{target.name}'. #{image_note}".strip
   end
 
   # Downloads the product image of the page, returns a sentence for the flash message.

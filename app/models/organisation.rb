@@ -10,6 +10,8 @@ class Organisation < ApplicationRecord
                       dependent: :nullify
 
   before_validation :normalize_roles
+  # products refer to their manufacturer by name: renaming keeps them linked
+  after_update :rename_manufacturer_in_products, if: :saved_change_to_name?
 
   validates :name, presence: true
   validate :roles_are_known
@@ -22,6 +24,14 @@ class Organisation < ApplicationRecord
 
   def deleted?
     self[:deleted]
+  end
+
+  # Products of this organisation as manufacturer (linked by name)
+  def manufactured_products
+    key = Product.normalize_manufacturer(name)
+    return Product.none unless key
+
+    Product.existing.where("lower(btrim(products.manufacturer)) = ?", key)
   end
 
   # All organisations below this one (children, their children, ...)
@@ -44,6 +54,13 @@ class Organisation < ApplicationRecord
   end
 
   private
+
+  def rename_manufacturer_in_products
+    old_key = Product.normalize_manufacturer(name_before_last_save)
+    return unless old_key
+
+    Product.where("lower(btrim(manufacturer)) = ?", old_key).update_all(manufacturer: name, updated_at: Time.current)
+  end
 
   def parent_is_not_self_or_descendant
     return if parent_id.blank? || new_record?

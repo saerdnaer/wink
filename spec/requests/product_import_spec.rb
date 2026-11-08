@@ -48,7 +48,7 @@ RSpec.describe "Create product from URL" do
     expect(response).to redirect_to("/products/#{product.id}/edit")
     expect(product).to have_attributes(name: "Eurobehälter ED 43/17 HG", manufacturer: "AUER Packaging",
                                        product_number: "ED 43/17 HG", price: BigDecimal("11.32"),
-                                       description: "Außenmaße 40 x 30 cm - Volumen: 15 Liter",
+                                       description: nil, details: "Außenmaße 40 x 30 cm - Volumen: 15 Liter",
                                        product_link: "https://shop.example/de/Eurobehaelter/ED-4317-HG.html")
     expect(product.meta["source_url"]).to eq url
   end
@@ -61,12 +61,35 @@ RSpec.describe "Create product from URL" do
     expect(flash[:notice]).to include("The image was downloaded")
   end
 
-  it "does not import a product twice" do
+  it "asks before importing a product that already exists" do
     post "/products/from_url", params: { url: url }
     post "/products/from_url", params: { url: url }
 
     expect(Product.where(gtin: 4_260_109_960_629).count).to eq 1
-    expect(flash[:notice]).to include("already exists")
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.body).to include("Similar products already exist", "merge_into")
+  end
+
+  it "creates a second product when confirmed" do
+    Product.create!(name: "Eurobehälter ED 43/17 HG")
+    count = Product.count
+
+    post "/products/from_url", params: { url: url, create_anyway: "1" }
+
+    expect(Product.count).to eq count + 1
+  end
+
+  it "merges the page into an existing product, filling only empty fields" do
+    existing = Product.create!(name: "ED 43/17 HG", manufacturer: "Auer", model: "ED 43/17 HG")
+    count = Product.count
+
+    post "/products/from_url", params: { url: url, merge_into: existing.id }
+
+    expect(response).to redirect_to("/products/#{existing.id}")
+    expect(existing.reload).to have_attributes(name: "ED 43/17 HG", manufacturer: "Auer",
+                                               gtin: 4_260_109_960_629, details: "Außenmaße 40 x 30 cm - Volumen: 15 Liter")
+    expect(existing.image).to be_present
+    expect(Product.count).to eq count
   end
 
   it "still creates the product when the image cannot be used" do

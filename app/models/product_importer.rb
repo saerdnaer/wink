@@ -49,7 +49,7 @@ class ProductImporter
     text = SchemaOrg.method(:text)
     {
       name: text.call(node["name"]),
-      description: SchemaOrg.plain_text(node["description"]),
+      details: SchemaOrg.plain_text(node["description"]),
       manufacturer: text.call(node["manufacturer"]).presence || text.call(node["brand"]),
       model: text.call(node["model"]),
       product_number: text.call(node["mpn"]).presence || text.call(node["sku"]),

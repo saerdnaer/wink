@@ -5,10 +5,19 @@
 %p
   %label{for: 'product_description'}= "Description:"
   %label.hint Short description, e.g. "Camera"
-  = f.text_field :description
+  = f.text_field :description, maxlength: 120
+%p
+  %label{for: 'product_details'}= "Details:"
+  %label.hint Long description and general data, e.g. technical specifications
+  = f.text_area :details, rows: 6
 %p
   %label{for: 'product_manufacturer'}= "Manufacturer:"
-  = f.text_field :manufacturer
+  %label.hint Pick an organisation (linked by name) or type any text
+  = f.text_field :manufacturer, list: "manufacturer_organisations", autocomplete: "off"
+  -# manufacturers first, then all other organisations; the field stays a free text
+  %datalist#manufacturer_organisations
+    - Organisation.existing.order(Arel.sql("CASE WHEN 'manufacturer' = ANY (roles) THEN 0 ELSE 1 END"), :name).each do |organisation|
+      %option{value: organisation.name}= organisation.roles.include?("manufacturer") ? "" : "(#{organisation.roles.join(', ').presence || 'no role'})"
 %p
   %label{for: 'product_model'}= "Model:"
   = f.text_field :model

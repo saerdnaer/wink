@@ -1,0 +1,28 @@
+- content_for :title, "Similar product - "
+
+%h2 Similar products already exist
+
+%p
+  The page
+  %a{href: @result.source_url, target: "_blank"}= URI.parse(@result.source_url).host
+  contains
+  %b= @result.attributes[:name]
+  = "(#{[@result.attributes[:manufacturer], @result.attributes[:model]].compact_blank.join(' ')})" if @result.attributes.values_at(:manufacturer, :model).any?(&:present?)
+
+%ul
+  - @duplicates.each do |duplicate|
+    %li
+      %a{href: product_path(duplicate), target: "_blank"}= duplicate.name
+      = [duplicate.manufacturer, duplicate.model].compact_blank.join(" ")
+      = form_with url: from_url_products_path, method: :post, local: true, class: "inline_form" do
+        = hidden_field_tag :url, params[:url]
+        = hidden_field_tag :merge_into, duplicate.id
+        = submit_tag "Merge into this", name: nil
+
+%p.hint Merging fills only the empty fields of the existing product (and its image) with the data of the page.
+
+= form_with url: from_url_products_path, method: :post, local: true, class: "inline_form" do
+  = hidden_field_tag :url, params[:url]
+  = hidden_field_tag :create_anyway, 1
+  = submit_tag "Create a new product anyway", name: nil
+= link_to "Cancel", products_path

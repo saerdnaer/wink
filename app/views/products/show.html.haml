@@ -6,7 +6,7 @@
   = image_tag image_product_path(@product), alt: @product.name, class: "image_large"
 
 %ol.properties
-  - { "Description" => @product.description, "Manufacturer" => @product.manufacturer,
+  - { "Description" => @product.description, "Manufacturer" => manufacturer_link(@product),
       "Model" => @product.model, "Product number" => @product.product_number,
       "GTIN" => @product.gtin, "ASIN" => @product.asin,
       "Purchase price" => (number_to_currency(@product.price) if @product.price),
@@ -25,6 +25,10 @@
       %label Wiki
       %span
         %a{href: @product.web_url}= @product.web_url
+  - if @product.details.present?
+    %li
+      %label Details
+      %span.details= simple_format(h(@product.details))
   %br
   %li
     %label Actions
