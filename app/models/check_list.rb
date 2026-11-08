@@ -9,6 +9,22 @@ class CheckList < ApplicationRecord
 
   validates :advisor, presence: { message: "is missing, please enter your name (or the names of everyone checking)" }
 
+  # "Bert, Ernie and Grover" => ["Bert", "Ernie", "Grover"]
+  def advisor_names
+    advisor.to_s.split(/\s*(?:,|&|\band\b)\s*/i).map(&:squish).compact_blank
+  end
+
+  # Adds a name to the advisors unless it is already listed (ignoring case).
+  # Returns true if the name was added.
+  def add_advisor(name)
+    name = name.to_s.squish
+    return false if name.blank? || advisor_names.any? { |existing| existing.casecmp?(name) }
+
+    names = advisor_names + [ name ]
+    self.advisor = names.size == 1 ? names.first : "#{names[0..-2].join(', ')} and #{names.last}"
+    true
+  end
+
   # rubocop:disable Naming/PredicateMethod
   def copy_items!
     return false if check_list_items.any?

@@ -6,9 +6,10 @@
   at
   %a{href: event_path(@check_list.event), target: '_blank'}= @check_list.event.name
 
-%p.check_list_advisor
+%p.check_list_advisor{data: { add_advisor_url: add_advisor_check_list_path(@check_list) }}
   Checked by
-  %strong= @check_list.advisor
+  %strong.advisor_names= @check_list.advisor
+  %button.add_my_name{type: "button", title: "Add your name to the people doing this check"} + add my name
   - if @check_list.comment.present?
     %span.hint= "– #{@check_list.comment}"
 

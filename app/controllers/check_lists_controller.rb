@@ -70,6 +70,17 @@ class CheckListsController < ApplicationController
     end
   end
 
+  # POST /check_lists/:id/add_advisor (name): puts a name on the list of advisors
+  def add_advisor
+    name = params[:name].to_s.squish
+    return render(json: { error: "name is missing or too long" }, status: :unprocessable_content) if name.blank? || name.length > 100
+
+    added = @check_list.add_advisor(name)
+    @check_list.save! if added
+
+    render json: { advisor: @check_list.advisor, added: added }
+  end
+
   # Check checklist.
   def update
     counts = params.dig(:check_list, :counts)

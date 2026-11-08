@@ -22,4 +22,5 @@
 //= require check_list_offline
 //= require check_list_sections
 //= require check_list_counts
+//= require check_list_advisor
 

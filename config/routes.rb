@@ -13,7 +13,11 @@ Rails.application.routes.draw do
   get "/events/import", to: "events#import_events"
   resources :events
 
-  resources :check_lists
+  resources :check_lists do
+    member do
+      post :add_advisor
+    end
+  end
 
   get "/transports/import", to: "transports#import_transports"
   resources :transports

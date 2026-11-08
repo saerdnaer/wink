@@ -429,4 +429,53 @@ RSpec.describe "Check lists" do
       expect(entry.item.countable).to be true
     end
   end
+
+  describe "adding your name" do
+    let(:event) { Event.create!(name: "ev", start_date: Time.zone.today, end_date: Time.zone.today, location: "x") }
+    let!(:check_list) { CheckList.create!(advisor: "Bert") }
+
+    before { EventCase.create!(event: event, case: case_record, check_list: check_list) }
+
+    def add_advisor(name)
+      post "/check_lists/#{check_list.id}/add_advisor", params: { name: name }
+      JSON.parse(response.body)
+    end
+
+    it "has a button on the edit page" do
+      get "/check_lists/#{check_list.id}/edit"
+
+      expect(response.body).to include("add_my_name", "advisor_names", "/check_lists/#{check_list.id}/add_advisor")
+    end
+
+    it "adds the name to the advisors" do
+      expect(add_advisor("Ernie")).to eq("advisor" => "Bert and Ernie", "added" => true)
+      expect(check_list.reload.advisor).to eq "Bert and Ernie"
+    end
+
+    it "lists three or more names with commas" do
+      add_advisor("Ernie")
+
+      expect(add_advisor("Grover")["advisor"]).to eq "Bert, Ernie and Grover"
+    end
+
+    it "does not add a name twice, ignoring case and spaces" do
+      expect(add_advisor("  bert ")).to eq("advisor" => "Bert", "added" => false)
+    end
+
+    it "rejects empty and very long names" do
+      add_advisor("")
+      expect(response).to have_http_status(:unprocessable_content)
+
+      add_advisor("x" * 101)
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(check_list.reload.advisor).to eq "Bert"
+    end
+
+    it "knows the names in advisor strings" do
+      check_list.advisor = "Bert, Ernie & Grover and Oscar"
+
+      expect(check_list.advisor_names).to eq %w[Bert Ernie Grover Oscar]
+      expect(CheckList.new(advisor: "Alexander").advisor_names).to eq [ "Alexander" ]
+    end
+  end
 end

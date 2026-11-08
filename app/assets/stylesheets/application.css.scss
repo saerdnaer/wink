@@ -880,3 +880,27 @@ table.count_results {
   tr.count_under td { background: #fff3c4; }
 }
 
+// "+ add my name" next to the advisors of a check list
+.check_list_advisor .add_my_name {
+  margin-left: 0.6em;
+  padding: 1px 8px;
+  border: none;
+  border-radius: 0;
+  background: #000;
+  color: #fff;
+  font: inherit;
+  font-size: 0.8em;
+  cursor: pointer;
+
+  &:hover:not(:disabled), &:focus {
+    background: #28c3ab;
+    color: #000;
+  }
+
+  &:disabled {
+    background: #ddd;
+    color: #555;
+    cursor: default;
+  }
+}
+
